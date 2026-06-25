@@ -8,86 +8,106 @@
 <meta name="description" content="Benchmarking structural reasoning for technical design with US design patent figures. Working draft.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
 <style>
   :root{
-    --paper:#F7F5F2; --ink:#14110E; --copper:#CB4D20; --blue:#5692E5;
-    --teal:#20A380; --olive:#585E53; --rule:#d9d4cc; --gray:#b7b1a7;
+    --paper:#F7F5F2; --ink:#14110E; --accent:#0f62fe; --accent-d:#0043ce; --blue:#5692E5;
+    --teal:#20A380; --olive:#585E53; --rule:#e4e2db; --gray:#b7b1a7;
+    --box:#ffffff; --code:#eef0f3;
     --serif:'Source Serif 4','Charter','Iowan Old Style',Georgia,serif;
-    --mono:ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;
+    --mono:'Source Code Pro',ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;
     --col:680px;
   }
   *{box-sizing:border-box}
-  html{-webkit-text-size-adjust:100%}
+  html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
   body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);
     font-size:18px;line-height:1.65;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
   .wrap{max-width:var(--col);margin:0 auto;padding:0 32px}
-  header{padding:78px 0 0}
+  header{padding:78px 0 4px}
   h1{font-size:clamp(30px,5.4vw,44px);line-height:1.1;font-weight:600;letter-spacing:-.012em;
     text-wrap:balance;margin:0 0 18px}
   .byline{font-family:var(--mono);font-size:13px;color:var(--olive);display:flex;flex-wrap:wrap;
-    gap:8px 18px;align-items:baseline;margin:0 0 16px}
-  .status{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.1em;
-    text-transform:uppercase;color:var(--copper);border:1px solid #e3c4b4;
-    background:#f7ece6;border-radius:2px;padding:3px 9px}
-  .topline{height:2px;background:var(--ink);margin:36px 0 4px}
-  section{padding:36px 0}
-  section + section{border-top:1px solid var(--rule)}
+    gap:8px 18px;align-items:baseline;margin:0}
+  nav.toc{margin:30px 0 4px;padding:16px 20px;background:var(--box);border-radius:5px}
+  nav.toc .tl{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--olive);margin-bottom:11px}
+  nav.toc ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+  nav.toc a{font-family:var(--mono);font-size:13px;color:var(--ink);text-decoration:none;display:flex;gap:12px}
+  nav.toc a .n{color:var(--accent);min-width:24px}
+  nav.toc a:hover{color:var(--accent)}
+  section{padding:34px 0 0}
   h2{font-family:var(--mono);font-size:13px;letter-spacing:.13em;text-transform:uppercase;
-    color:var(--olive);font-weight:600;margin:0 0 24px;display:flex;gap:13px;align-items:baseline}
-  h2 .n{color:var(--copper)}
+    color:var(--olive);font-weight:600;margin:0 0 24px;display:flex;gap:13px;align-items:baseline;
+    scroll-margin-top:20px}
+  h2 .n{color:var(--accent)}
   h3{font-size:20px;font-weight:600;letter-spacing:-.005em;margin:32px 0 12px;text-wrap:balance}
   p{margin:0 0 18px} p:last-child{margin-bottom:0}
   .lead{font-size:20px;line-height:1.5}
   ol.tasks{list-style:none;counter-reset:t;margin:0;padding:0;display:flex;flex-direction:column;gap:28px}
-  ol.tasks > li{counter-increment:t;padding-left:44px;position:relative}
+  ol.tasks > li{counter-increment:t;padding-left:46px;position:relative}
   ol.tasks > li::before{content:counter(t,decimal-leading-zero);position:absolute;left:0;top:1px;
-    font-family:var(--mono);font-size:12px;color:var(--copper);letter-spacing:.04em;
-    border:1px solid #e3c4b4;border-radius:2px;padding:2px 6px;background:#f7ece6}
+    font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.04em;
+    border-radius:4px;padding:3px 8px;background:#e7eefc}
   ol.tasks .name{font-weight:600}
-  pre{font-family:var(--mono);font-size:13px;line-height:1.6;background:#fff;
-    border:1px solid var(--rule);border-left:2px solid var(--copper);border-radius:2px;
-    padding:15px 17px;margin:14px 0 0;overflow-x:auto;color:#2b2620;font-variant-ligatures:none}
+  pre{font-family:var(--mono);font-size:13px;line-height:1.6;background:var(--code);
+    border-radius:5px;padding:15px 17px;margin:14px 0 0;overflow-x:auto;color:#2b2620;
+    font-variant-ligatures:none}
   pre .c{color:var(--gray)}
   figure{margin:26px 0 6px}
-  figure img,figure svg.grammar,figure svg.chart{display:block;width:100%;height:auto;border:2px solid var(--ink);background:#fff}
-  figure svg.chart{padding:8px 6px}
+  figure img,figure svg.chart{display:block;width:100%;height:auto;
+    background:var(--box);border-radius:5px;padding:12px}
+  svg.chart text{font-family:var(--mono)}
   .legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:11px;
     font-family:var(--mono);font-size:12px;color:#33302a}
   .legend span{display:inline-flex;align-items:center;gap:7px}
   .legend i{width:16px;height:3px;border-radius:2px;display:inline-block}
-  .example{border:1px solid var(--rule);border-left:2px solid var(--copper);background:#fff;
-    border-radius:2px;padding:16px 18px;margin:18px 0 6px}
+  /* induced-grammar component (real HTML, not baked SVG text) */
+  .grammar{background:var(--box);border-radius:5px;padding:16px 20px;display:flex;
+    flex-direction:column;gap:2px}
+  .grammar .ghead{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.08em;
+    margin:13px 0 5px}
+  .grammar .ghead:first-child{margin-top:0}
+  .grammar .grow{display:grid;grid-template-columns:26px 116px 1fr auto;align-items:center;
+    gap:12px;padding:3px 0}
+  .grammar .gdot{border-radius:50%;justify-self:center}
+  .grammar .gname{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--ink)}
+  .grammar .gbar{height:13px;border-radius:3px;background:rgba(20,17,14,.05);overflow:hidden}
+  .grammar .gbar i{display:block;height:100%;border-radius:3px;opacity:.9}
+  .grammar .gval{font-family:var(--mono);font-size:11px;color:var(--olive);white-space:nowrap}
+  @media(max-width:560px){.grammar .grow{grid-template-columns:22px 1fr auto;gap:9px}
+    .grammar .gbar{display:none}}
+  .example{background:var(--box);border-radius:5px;padding:17px 19px;margin:18px 0 6px}
   .exlabel{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
     color:var(--olive);margin-bottom:11px}
   .exdesc{font-size:15px;color:#33302a;margin:0 0 14px}
-  .exrow{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:8px}
-  .exrow:last-child{margin-bottom:0}
-  .branch{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;
-    width:88px;flex:0 0 88px}
-  .branch.pic{color:var(--blue)} .branch.ortho{color:#157a60}
-  .chip{font-family:var(--mono);font-size:12px;padding:3px 9px;border-radius:2px;border:1px solid}
-  .chip.pic{color:var(--blue);border-color:#bcd5f4;background:#eef3fb}
-  .chip.ortho{color:#157a60;border-color:#a9ddcd;background:#ebf6f2}
-  figcaption{font-family:var(--mono);font-size:12px;line-height:1.5;color:var(--olive);margin-top:9px}
+  table.extab{margin:0}
+  table.extab td{padding:7px 14px 7px 0;border-bottom:1px solid var(--rule)}
+  table.extab tr:last-child td{border-bottom:0}
+  table.extab .fig{font-family:var(--mono);font-size:13px;color:var(--olive);white-space:nowrap}
+  table.extab .vp{font-weight:600}
+  .btag{font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:4px;white-space:nowrap}
+  .btag.pic{color:#2a63b8;background:#e7eefb}
+  .btag.ortho{color:#157a60;background:#e4f3ee}
+  figcaption{font-family:var(--mono);font-size:12px;line-height:1.5;color:var(--olive);margin-top:10px}
   figcaption b{color:var(--ink);font-weight:600}
-  blockquote{margin:0;padding:2px 0 2px 18px;border-left:2px solid var(--copper);
-    font-style:italic;color:#33302a;font-size:20px;line-height:1.45}
+  blockquote{margin:0;padding:17px 20px;background:#e8f0fd;border-radius:5px;
+    font-style:italic;color:#2a2e36;font-size:20px;line-height:1.45}
   .tablewrap{overflow-x:auto;margin:18px 0 6px}
   table{border-collapse:collapse;width:100%;font-size:15px;font-variant-numeric:tabular-nums}
   th,td{text-align:left;padding:8px 14px 8px 0;border-bottom:1px solid var(--rule)}
   thead th{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.07em;
     color:var(--olive);font-weight:600;border-bottom:1.5px solid var(--ink)}
   td.num,th.num{text-align:right;padding-right:18px}
-  a{color:var(--copper);text-decoration-thickness:1px;text-underline-offset:2px}
-  a.cite{color:var(--olive);text-decoration:none;border-bottom:1px dotted var(--gray);white-space:nowrap}
-  a.cite:hover{color:var(--copper);border-bottom-color:var(--copper)}
+  a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
+  a:hover{color:var(--accent-d)}
+  a.cite{color:var(--accent);text-decoration:none;white-space:nowrap}
+  a.cite:hover{text-decoration:underline}
   ol.refs{font-size:14.5px;line-height:1.5;padding-left:22px;display:flex;flex-direction:column;gap:11px;color:#33302a}
   ol.refs li{padding-left:4px}
   ol.refs a{word-break:break-word}
-  footer{padding:38px 0 88px;color:var(--olive);font-family:var(--mono);font-size:12px;
-    letter-spacing:.02em;border-top:1px solid var(--rule);margin-top:6px}
-  ::selection{background:var(--copper);color:#fff}
+  footer{padding:36px 0 88px;color:var(--olive);font-family:var(--mono);font-size:12px;
+    letter-spacing:.02em;margin-top:20px}
+  ::selection{background:var(--accent);color:#fff}
   @media (max-width:560px){ body{font-size:17px} header{padding-top:52px} .wrap{padding:0 22px} }
 </style>
 </head>
@@ -96,19 +116,31 @@
   <header>
     <h1>Explorations into (LLM) spatial reasoning with design patents</h1>
     <div class="byline"><span>Hamidah Oderinwale</span><span>May 2026</span></div>
-    <span class="status">Working draft &middot; paper in preparation</span>
-    <div class="topline"></div>
   </header>
 
+  <nav class="toc">
+    <div class="tl">Contents</div>
+    <ol>
+      <li><a href="#s1"><span class="n">&sect;1</span> Validating the bitter lesson</a></li>
+      <li><a href="#s2"><span class="n">&sect;2</span> Why we use design patents to probe into spatial reasoning</a></li>
+      <li><a href="#s3"><span class="n">&sect;3</span> Tasks</a></li>
+      <li><a href="#s4"><span class="n">&sect;4</span> Benchmark construction</a></li>
+      <li><a href="#s5"><span class="n">&sect;5</span> Results</a></li>
+      <li><a href="#s6"><span class="n">&sect;6</span> Supporting models with anchors</a></li>
+      <li><a href="#s7"><span class="n">&sect;7</span> Discussion</a></li>
+      <li><a href="#s8"><span class="n">&sect;8</span> References</a></li>
+    </ol>
+  </nav>
+
   <section>
-    <h2><span class="n">&sect;1</span> Validating the bitter lesson</h2>
+    <h2 id="s1"><span class="n">&sect;1</span> Validating the bitter lesson</h2>
     <p class="lead">In this work, we study structural reasoning in the context of patent and technical design understanding. Our contributions include several novel task types that benchmark capabilities needed for strong agentic performance in physical design domains.</p>
-    <p>For each task, we experiment with multiple representations of the underlying information. We are interested not only in which models perform best, but how the way the information they are presented and asked to present is structured. To do this, we also release a gym environment with design patent figures as states, a DSL action space for composing figures, gradeable spatial reasoning tasks that provide verifiable rewards, and a renderer that turns the DSL into a visual form.</p>
+    <p>For each task, we experiment with multiple representations of the underlying information. We are interested not only in which models perform best, but how the way the information they are presented and asked to present is structured. To do this, we also release a gym environment with design patent figures as states, a <a href="https://en.wikipedia.org/wiki/Domain-specific_language">DSL</a> action space for composing figures, gradeable spatial reasoning tasks that provide verifiable rewards, and a renderer that turns the DSL into a visual form.</p>
     <p>In general, we find that representational interventions can equip models with the support they need to perform on tasks that require spatial understanding, however, it is important to be intentional about the types of representations and when they are implemented. In our view, spatial reasoning can be decomposed into two parts: categorical and geometric thinking. Categorical thinking &mdash; where a model, for example, should identify the correct viewpoints from a set &mdash; is best supported via test-time reasoning, whereas geometric thinking likely needs to be imbued in a model during early stages (i.e. training).</p>
   </section>
 
   <section>
-    <h2><span class="n">&sect;2</span> Why we use design patents to probe into spatial reasoning</h2>
+    <h2 id="s2"><span class="n">&sect;2</span> Why we use design patents to probe into spatial reasoning</h2>
     <p>We view patents and their figures as a rich data source given their ground truth and real-world implications for relational structural understanding in a visual domain. Patent analysts and inventors ask questions relevant to anyone building generatively: how similar is what I&rsquo;m building to existing tools? How do I build cumulatively without redundant work? And what should I add next? We use these as the basis for our task design. For agents to be true builders, they should understand how their outputs fit into the existing innovation landscape and situate their generations within that context.</p>
     <figure>
       <img src="figures/viewset_D1009512.png" alt="A cleaning tool rack shown across six viewpoints: two isometric views, a top plan, a section, a rear elevation, and a bottom plan.">
@@ -119,7 +151,7 @@
   </section>
 
   <section>
-    <h2><span class="n">&sect;3</span> Tasks</h2>
+    <h2 id="s3"><span class="n">&sect;3</span> Tasks</h2>
     <ol class="tasks">
       <li>
         <p><span class="name">Masked view.</span> For this task, we try to assess models&rsquo; ability to determine the viewpoint of a given figure. This task is structured where the figures of a patent are described, all but one have their viewpoints written out and the remaining one does not. From this, the model has to write out the viewpoint of the masked figure.</p>
@@ -160,7 +192,7 @@ Score: 1 if Maker&rsquo;s pick == Designer&rsquo;s target, else 0</pre>
   </section>
 
   <section>
-    <h2><span class="n">&sect;4</span> Benchmark construction</h2>
+    <h2 id="s4"><span class="n">&sect;4</span> Benchmark construction</h2>
     <h3>Dataset</h3>
     <p>We source patents and the corresponding designs from the IMPACT dataset <a class="cite" href="#ref-shomee2024">(Shomee et al., 2024)</a> &mdash; a multi-modal dataset of patents and their figures in paired image&ndash;caption format with accompanying patent metadata including the issuing year, the author, and its description. The dataset includes patents from a 15-year time-span (2007&ndash;2022). We enrich the dataset with data from 2023&ndash;April 2026 and include model-generated descriptions of the images themselves and we gather metadata for the figures including how many there are per patent, the ID, sibling figures and we number the components. For the years we extend, we source the figure images from Google Patents image hosting. In total, we analyze 2.65M patent figures. As part of our processing for this data and as the setup for our tasks we embed each figure with CLIP ViT-L/14, 768-dim.</p>
     <h3>A graphical DSL</h3>
@@ -168,8 +200,16 @@ Score: 1 if Maker&rsquo;s pick == Designer&rsquo;s target, else 0</pre>
     <div class="example">
       <div class="exlabel">From the corpus &mdash; Patent D1017555, &ldquo;fastening clip for cables&rdquo; (the clip in Fig.&nbsp;2)</div>
       <p class="exdesc">FIG. 1 is an isometric view showing the left side and top of our design of a fastening clip for cables. FIG. 2 is an isometric view showing the right side and bottom thereof; FIG. 3 is a front elevational view thereof; FIG. 4 is a rear elevational view thereof; FIG. 5 is a left side elevational view thereof; FIG. 6 is a right side elevational view thereof; FIG. 7 is a top plan view thereof; and, FIG. 8 is a bottom view thereof.</p>
-      <div class="exrow"><span class="branch pic">pictorial</span><span class="chip pic">FIG 1 &middot; isometric</span><span class="chip pic">FIG 2 &middot; isometric</span></div>
-      <div class="exrow"><span class="branch ortho">orthographic</span><span class="chip ortho">FIG 3 &middot; front elevation</span><span class="chip ortho">FIG 4 &middot; rear elevation</span><span class="chip ortho">FIG 5 &middot; left elevation</span><span class="chip ortho">FIG 6 &middot; right elevation</span><span class="chip ortho">FIG 7 &middot; top plan</span><span class="chip ortho">FIG 8 &middot; bottom plan</span></div>
+      <table class="extab"><tbody>
+        <tr><td class="fig">FIG. 1</td><td class="vp">isometric</td><td><span class="btag pic">pictorial</span></td></tr>
+        <tr><td class="fig">FIG. 2</td><td class="vp">isometric</td><td><span class="btag pic">pictorial</span></td></tr>
+        <tr><td class="fig">FIG. 3</td><td class="vp">front elevation</td><td><span class="btag ortho">orthographic</span></td></tr>
+        <tr><td class="fig">FIG. 4</td><td class="vp">rear elevation</td><td><span class="btag ortho">orthographic</span></td></tr>
+        <tr><td class="fig">FIG. 5</td><td class="vp">left elevation</td><td><span class="btag ortho">orthographic</span></td></tr>
+        <tr><td class="fig">FIG. 6</td><td class="vp">right elevation</td><td><span class="btag ortho">orthographic</span></td></tr>
+        <tr><td class="fig">FIG. 7</td><td class="vp">top plan</td><td><span class="btag ortho">orthographic</span></td></tr>
+        <tr><td class="fig">FIG. 8</td><td class="vp">bottom plan</td><td><span class="btag ortho">orthographic</span></td></tr>
+      </tbody></table>
     </div>
     <p>At the root of the grammar, it breaks down into pictorial and orthographic representations. Pictorial representations refer to images of the figures with depth; orthographic ones are flat and taken head-on (e.g. front, rear, left, right, top, and bottom views). Pictorial views then branch into perspective (representing the figure as it would be perceived from different viewpoints) or isometric (representing the figure at 30 degrees off horizontal on each side, so that scale is preserved).</p>
     <figure>
@@ -177,35 +217,15 @@ Score: 1 if Maker&rsquo;s pick == Designer&rsquo;s target, else 0</pre>
       <figcaption><b>Fig. 2.</b> Comparison of pictorial and orthographic perspective for a small molded cable clip for cables (Patent D1017555).</figcaption>
     </figure>
     <figure>
-      <svg class="grammar" viewBox="0 0 960 250" role="img" aria-label="Hierarchical viewpoint grammar: the root splits into Pictorial (perspective, isometric) and Orthographic (elevation, plan, section); node size is proportional to corpus frequency.">
-      <path d="M480 50 L480 86 L258 86 L258 124" fill="none" stroke="#5692E5" stroke-width="1.6" opacity="0.85"/>
-      <path d="M480 50 L480 86 L677 86 L677 124" fill="none" stroke="#20A380" stroke-width="1.6" opacity="0.85"/>
-      <path d="M258 124 L258 166 L175 166 L175 208" fill="none" stroke="#5692E5" stroke-width="1.6" opacity="0.85"/>
-      <path d="M258 124 L258 166 L340 166 L340 208" fill="none" stroke="#a9c8f0" stroke-width="1.6" opacity="0.85"/>
-      <path d="M677 124 L677 166 L530 166 L530 208" fill="none" stroke="#20A380" stroke-width="1.6" opacity="0.85"/>
-      <path d="M677 124 L677 166 L680 166 L680 208" fill="none" stroke="#8fcdb9" stroke-width="1.6" opacity="0.85"/>
-      <path d="M677 124 L677 166 L820 166 L820 208" fill="none" stroke="#CB4D20" stroke-width="1.6" opacity="0.85"/>
-      <circle cx="480" cy="50" r="22.0" fill="#14110E"/>
-      <circle cx="258" cy="124" r="15.0" fill="#5692E5"/>
-      <text x="258" y="100.00935104918732" fill="#5692E5" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="15" font-weight="600">Pictorial</text>
-      <circle cx="677" cy="124" r="18.3" fill="#20A380"/>
-      <text x="677" y="96.74449674476554" fill="#20A380" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="15" font-weight="600">Orthographic</text>
-      <circle cx="175" cy="208" r="14.9" fill="#5692E5"/>
-      <text x="175" y="184.08302708577145" fill="#5692E5" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="15" font-weight="600">Perspective</text>
-      <text x="175" y="237.9" fill="#585E53" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="11">17 views</text>
-      <circle cx="340" cy="208" r="5.3" fill="#a9c8f0"/>
-      <text x="340" y="193.72954073264822" fill="#a9c8f0" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="15" font-weight="600">Isometric</text>
-      <text x="340" y="228.3" fill="#585E53" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="11">1 view</text>
-      <circle cx="530" cy="208" r="15.4" fill="#20A380"/>
-      <text x="530" y="183.63792952495012" fill="#20A380" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="15" font-weight="600">Elevation</text>
-      <text x="530" y="238.4" fill="#585E53" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="11">5 views</text>
-      <circle cx="680" cy="208" r="12.5" fill="#8fcdb9"/>
-      <text x="680" y="186.47483509015808" fill="#8fcdb9" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="15" font-weight="600">Plan</text>
-      <text x="680" y="235.5" fill="#585E53" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="11">2 views</text>
-      <circle cx="820" cy="208" r="5.2" fill="#CB4D20"/>
-      <text x="820" y="193.79821347985592" fill="#CB4D20" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="15" font-weight="600">Section</text>
-      <text x="820" y="228.2" fill="#585E53" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="11">1 view</text>
-    </svg>
+      <div class="grammar">
+      <div class="ghead" style="color:#5692E5">PICTORIAL</div>
+      <div class="grow"><span class="gdot" style="width:19px;height:19px;background:#5692E5"></span><span class="gname">Perspective</span><span class="gbar"><i style="width:92.3%;background:#5692E5"></i></span><span class="gval">49,841 &middot; 17 views</span></div>
+      <div class="grow"><span class="gdot" style="width:8px;height:8px;background:#a9c8f0"></span><span class="gname">Isometric</span><span class="gbar"><i style="width:1.3%;background:#a9c8f0"></i></span><span class="gval">675 &middot; 1 view</span></div>
+      <div class="ghead" style="color:#20A380">ORTHOGRAPHIC</div>
+      <div class="grow"><span class="gdot" style="width:20px;height:20px;background:#20A380"></span><span class="gname">Elevation</span><span class="gbar"><i style="width:100.0%;background:#20A380"></i></span><span class="gval">53,988 &middot; 5 views</span></div>
+      <div class="grow"><span class="gdot" style="width:17px;height:17px;background:#8fcdb9"></span><span class="gname">Plan</span><span class="gbar"><i style="width:56.3%;background:#8fcdb9"></i></span><span class="gval">30,394 &middot; 2 views</span></div>
+      <div class="grow"><span class="gdot" style="width:7px;height:7px;background:#8a3ffc"></span><span class="gname">Section</span><span class="gbar"><i style="width:1.1%;background:#8a3ffc"></i></span><span class="gval">604 &middot; 1 view</span></div>
+      </div>
       <figcaption><b>Fig. 3.</b> The induced hierarchical viewpoint grammar. The node size is proportional to corpus frequency.</figcaption>
     </figure>
     <p>Models are given a canvas and essentially a set of shapes and lines forming a total of three primitives (lines, circles, and arcs) that they can use to build figures. The transformation of these primitives into ink on the blank canvas is known as rasterization.</p>
@@ -221,7 +241,7 @@ Score: 1 if Maker&rsquo;s pick == Designer&rsquo;s target, else 0</pre>
   </section>
 
   <section>
-    <h2><span class="n">&sect;5</span> Results</h2>
+    <h2 id="s5"><span class="n">&sect;5</span> Results</h2>
     <p>We find that models are capable of identifying perspective from flat orthographic views (2D representations, akin to what you would observe if you had scanned a 3D object), but struggle with pictorial views (3D representations, akin to what you would observe if you had taken a picture of a 3D object from an angle). We see that models lack the ability to verify the viewpoints they suggest.</p>
     <div class="tablewrap"><table>
       <thead><tr><th>Condition</th><th class="num">Similarity</th><th class="num">&Delta;</th></tr></thead>
@@ -264,13 +284,13 @@ Score: 1 if Maker&rsquo;s pick == Designer&rsquo;s target, else 0</pre>
       <circle cx="444.0" cy="187.8" r="3.5" fill="#14110E" stroke="#fff" stroke-width="1"/>
       <circle cx="572.0" cy="194.5" r="3.5" fill="#14110E" stroke="#fff" stroke-width="1"/>
       <circle cx="700.0" cy="157.3" r="3.5" fill="#14110E" stroke="#fff" stroke-width="1"/>
-      <polyline points="60.0,89.6 188.0,137.0 316.0,153.9 444.0,153.9 572.0,201.3 700.0,235.7" fill="none" stroke="#CB4D20" stroke-width="2"/>
-      <circle cx="60.0" cy="89.6" r="3.5" fill="#CB4D20" stroke="#fff" stroke-width="1"/>
-      <circle cx="188.0" cy="137.0" r="3.5" fill="#CB4D20" stroke="#fff" stroke-width="1"/>
-      <circle cx="316.0" cy="153.9" r="3.5" fill="#CB4D20" stroke="#fff" stroke-width="1"/>
-      <circle cx="444.0" cy="153.9" r="3.5" fill="#CB4D20" stroke="#fff" stroke-width="1"/>
-      <circle cx="572.0" cy="201.3" r="3.5" fill="#CB4D20" stroke="#fff" stroke-width="1"/>
-      <circle cx="700.0" cy="235.7" r="3.5" fill="#CB4D20" stroke="#fff" stroke-width="1"/>
+      <polyline points="60.0,89.6 188.0,137.0 316.0,153.9 444.0,153.9 572.0,201.3 700.0,235.7" fill="none" stroke="#8a3ffc" stroke-width="2"/>
+      <circle cx="60.0" cy="89.6" r="3.5" fill="#8a3ffc" stroke="#fff" stroke-width="1"/>
+      <circle cx="188.0" cy="137.0" r="3.5" fill="#8a3ffc" stroke="#fff" stroke-width="1"/>
+      <circle cx="316.0" cy="153.9" r="3.5" fill="#8a3ffc" stroke="#fff" stroke-width="1"/>
+      <circle cx="444.0" cy="153.9" r="3.5" fill="#8a3ffc" stroke="#fff" stroke-width="1"/>
+      <circle cx="572.0" cy="201.3" r="3.5" fill="#8a3ffc" stroke="#fff" stroke-width="1"/>
+      <circle cx="700.0" cy="235.7" r="3.5" fill="#8a3ffc" stroke="#fff" stroke-width="1"/>
       <polyline points="60.0,25.9 188.0,52.4 316.0,96.4 444.0,117.3 572.0,140.4 700.0,121.2" fill="none" stroke="#5692E5" stroke-width="2"/>
       <circle cx="60.0" cy="25.9" r="3.5" fill="#5692E5" stroke="#fff" stroke-width="1"/>
       <circle cx="188.0" cy="52.4" r="3.5" fill="#5692E5" stroke="#fff" stroke-width="1"/>
@@ -293,7 +313,7 @@ Score: 1 if Maker&rsquo;s pick == Designer&rsquo;s target, else 0</pre>
       <circle cx="572.0" cy="239.1" r="3.5" fill="#585E53" stroke="#fff" stroke-width="1"/>
       <circle cx="700.0" cy="249.2" r="3.5" fill="#585E53" stroke="#fff" stroke-width="1"/>
     </svg>
-    <div class="legend"><span><i style="background:#14110E"></i>Opus 4.5</span><span><i style="background:#CB4D20"></i>GPT-4o</span><span><i style="background:#5692E5"></i>Gemini 2.5 Pro</span><span><i style="background:#20A380"></i>Kimi K2</span><span><i style="background:#585E53"></i>Llama 3.3 70B</span></div>
+    <div class="legend"><span><i style="background:#14110E"></i>Opus 4.5</span><span><i style="background:#8a3ffc"></i>GPT-4o</span><span><i style="background:#5692E5"></i>Gemini 2.5 Pro</span><span><i style="background:#20A380"></i>Kimi K2</span><span><i style="background:#585E53"></i>Llama 3.3 70B</span></div>
       <figcaption><b>Fig. 5.</b> Accuracy by representation across models on the masked-view task. Natural prose leads to the best performance for the models.</figcaption>
     </figure>
 
@@ -316,18 +336,18 @@ Score: 1 if Maker&rsquo;s pick == Designer&rsquo;s target, else 0</pre>
   </section>
 
   <section>
-    <h2><span class="n">&sect;6</span> Supporting models with anchors</h2>
+    <h2 id="s6"><span class="n">&sect;6</span> Supporting models with anchors</h2>
     <p>Just as humans have heuristics and cognitive tools to help them navigate the world, we question whether with the right support, models can also reason and to what degree it helps. We provide different anchors to test this. The first anchor is an image of an object of the same view with a description and the prompting question. The second is a landmark, where we have the same two images and instead of asking the model to simply supply the view, we ask it to first identify a distinguishing feature or form of asymmetry to figure out the second image&rsquo;s viewpoint.</p>
   </section>
 
   <section>
-    <h2><span class="n">&sect;7</span> Discussion</h2>
+    <h2 id="s7"><span class="n">&sect;7</span> Discussion</h2>
     <blockquote>We find this suite of tasks compelling because domain expertise should not be a prerequisite for success.</blockquote>
     <p style="margin-top:18px">More broadly, we hope these findings can inform the design of new interfaces for interacting with foundation models, rather than focusing exclusively on measurable model capabilities. While we focus on evaluating models out of the box, future work might look at a broader set of models and their harnesses to emulate real-world conditions. Additionally, many of the tasks we include require compositional understanding of how components fit together in the physical world. It remains unclear, however, whether such understanding depends on visual reasoning and spatial cognition, or whether language and code abstractions alone are sufficient.</p>
   </section>
 
   <section>
-    <h2><span class="n">&sect;8</span> References</h2>
+    <h2 id="s8"><span class="n">&sect;8</span> References</h2>
     <ol class="refs">
       <li id="ref-hewitt2019">Hewitt, J. &amp; Liang, P. (2019). Designing and Interpreting Probes with Control Tasks. <i>EMNLP-IJCNLP</i>. <a href="https://arxiv.org/abs/1909.03368">arXiv:1909.03368</a></li>
       <li id="ref-huh2024">Huh, M., Cheung, B., Wang, T. &amp; Isola, P. (2024). The Platonic Representation Hypothesis. <i>ICML</i>. <a href="https://arxiv.org/abs/2405.07987">arXiv:2405.07987</a></li>
@@ -338,7 +358,7 @@ Score: 1 if Maker&rsquo;s pick == Designer&rsquo;s target, else 0</pre>
     </ol>
   </section>
 
-  <footer>Hamidah Oderinwale &middot; Working draft &middot; paper in preparation</footer>
+  <footer>Hamidah Oderinwale</footer>
 </div>
 </body>
 </html>
