@@ -56,6 +56,19 @@
     font-family:var(--mono);font-size:12px;color:#33302a}
   .legend span{display:inline-flex;align-items:center;gap:7px}
   .legend i{width:16px;height:3px;border-radius:2px;display:inline-block}
+  .example{border:1px solid var(--rule);border-left:2px solid var(--copper);background:#fff;
+    border-radius:2px;padding:16px 18px;margin:18px 0 6px}
+  .exlabel{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--olive);margin-bottom:11px}
+  .exdesc{font-size:15px;color:#33302a;margin:0 0 14px}
+  .exrow{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:8px}
+  .exrow:last-child{margin-bottom:0}
+  .branch{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;
+    width:88px;flex:0 0 88px}
+  .branch.pic{color:var(--blue)} .branch.ortho{color:#157a60}
+  .chip{font-family:var(--mono);font-size:12px;padding:3px 9px;border-radius:2px;border:1px solid}
+  .chip.pic{color:var(--blue);border-color:#bcd5f4;background:#eef3fb}
+  .chip.ortho{color:#157a60;border-color:#a9ddcd;background:#ebf6f2}
   figcaption{font-family:var(--mono);font-size:12px;line-height:1.5;color:var(--olive);margin-top:9px}
   figcaption b{color:var(--ink);font-weight:600}
   blockquote{margin:0;padding:2px 0 2px 18px;border-left:2px solid var(--copper);
@@ -102,7 +115,7 @@
       <figcaption><b>Fig. 1.</b> Sample figure for a cleaning tool rack with all viewpoints displayed.</figcaption>
     </figure>
     <h3>Our findings</h3>
-    <p>Overall, we find that models have the necessary knowledge but struggle to apply it in physical domains. That is, they can describe what they should do but struggle to execute. We use Locarno classifications to understand whether different types of design are more difficult for models.</p>
+    <p>Overall, we find that models have the necessary knowledge but struggle to apply it in physical domains. That is, they can describe what they should do but struggle to execute. We use <a href="https://www.wipo.int/classifications/locarno/en/">Locarno classifications</a> to understand whether different types of design are more difficult for models.</p>
   </section>
 
   <section>
@@ -152,6 +165,12 @@ Score: 1 if Maker&rsquo;s pick == Designer&rsquo;s target, else 0</pre>
     <p>We source patents and the corresponding designs from the IMPACT dataset <a class="cite" href="#ref-shomee2024">(Shomee et al., 2024)</a> &mdash; a multi-modal dataset of patents and their figures in paired image&ndash;caption format with accompanying patent metadata including the issuing year, the author, and its description. The dataset includes patents from a 15-year time-span (2007&ndash;2022). We enrich the dataset with data from 2023&ndash;April 2026 and include model-generated descriptions of the images themselves and we gather metadata for the figures including how many there are per patent, the ID, sibling figures and we number the components. For the years we extend, we source the figure images from Google Patents image hosting. In total, we analyze 2.65M patent figures. As part of our processing for this data and as the setup for our tasks we embed each figure with CLIP ViT-L/14, 768-dim.</p>
     <h3>A graphical DSL</h3>
     <p>Acknowledging that there was no pre-defined programming language for patent visual reasoning that could be used for our corpus, we induce a DSL directly from the corpus. To induce the grammar, we extract unique terms from each figure&rsquo;s description and attach each to a &ldquo;projection.&rdquo; In a given patent, the same article &mdash; for example, a hinge bracket &mdash; is shown in a variety of viewpoints (the front view, rear view, and the left and right views). We define each of these viewpoints as leaves in the tree.</p>
+    <div class="example">
+      <div class="exlabel">From the corpus &mdash; Patent D1017555, &ldquo;fastening clip for cables&rdquo; (the clip in Fig.&nbsp;2)</div>
+      <p class="exdesc">FIG. 1 is an isometric view showing the left side and top of our design of a fastening clip for cables. FIG. 2 is an isometric view showing the right side and bottom thereof; FIG. 3 is a front elevational view thereof; FIG. 4 is a rear elevational view thereof; FIG. 5 is a left side elevational view thereof; FIG. 6 is a right side elevational view thereof; FIG. 7 is a top plan view thereof; and, FIG. 8 is a bottom view thereof.</p>
+      <div class="exrow"><span class="branch pic">pictorial</span><span class="chip pic">FIG 1 &middot; isometric</span><span class="chip pic">FIG 2 &middot; isometric</span></div>
+      <div class="exrow"><span class="branch ortho">orthographic</span><span class="chip ortho">FIG 3 &middot; front elevation</span><span class="chip ortho">FIG 4 &middot; rear elevation</span><span class="chip ortho">FIG 5 &middot; left elevation</span><span class="chip ortho">FIG 6 &middot; right elevation</span><span class="chip ortho">FIG 7 &middot; top plan</span><span class="chip ortho">FIG 8 &middot; bottom plan</span></div>
+    </div>
     <p>At the root of the grammar, it breaks down into pictorial and orthographic representations. Pictorial representations refer to images of the figures with depth; orthographic ones are flat and taken head-on (e.g. front, rear, left, right, top, and bottom views). Pictorial views then branch into perspective (representing the figure as it would be perceived from different viewpoints) or isometric (representing the figure at 30 degrees off horizontal on each side, so that scale is preserved).</p>
     <figure>
       <img src="figures/pictorial_vs_orthographic.png" alt="A cable fastening clip drawn two ways: pictorial isometric views with depth on the left, and flat orthographic top, bottom, and side views on the right.">
