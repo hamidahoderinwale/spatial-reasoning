@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorations into (LLM) spatial reasoning with design patents</title>
+<meta name="author" content="Hamidah Oderinwale">
+<meta name="description" content="Benchmarking structural reasoning for technical design with US design patent figures. Working draft.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+  :root{
+    --paper:#F7F5F2; --ink:#14110E; --copper:#CB4D20; --blue:#5692E5;
+    --teal:#20A380; --olive:#585E53; --rule:#d9d4cc; --gray:#b7b1a7;
+    --serif:'Source Serif 4','Charter','Iowan Old Style',Georgia,serif;
+    --mono:ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;
+    --col:680px;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);
+    font-size:18px;line-height:1.65;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  .wrap{max-width:var(--col);margin:0 auto;padding:0 32px}
+  header{padding:78px 0 0}
+  h1{font-size:clamp(30px,5.4vw,44px);line-height:1.1;font-weight:600;letter-spacing:-.012em;
+    text-wrap:balance;margin:0 0 18px}
+  .byline{font-family:var(--mono);font-size:13px;color:var(--olive);display:flex;flex-wrap:wrap;
+    gap:8px 18px;align-items:baseline;margin:0 0 16px}
+  .status{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--copper);border:1px solid #e3c4b4;
+    background:#f7ece6;border-radius:2px;padding:3px 9px}
+  .topline{height:2px;background:var(--ink);margin:36px 0 4px}
+  section{padding:36px 0}
+  section + section{border-top:1px solid var(--rule)}
+  h2{font-family:var(--mono);font-size:13px;letter-spacing:.13em;text-transform:uppercase;
+    color:var(--olive);font-weight:600;margin:0 0 24px;display:flex;gap:13px;align-items:baseline}
+  h2 .n{color:var(--copper)}
+  h3{font-size:20px;font-weight:600;letter-spacing:-.005em;margin:32px 0 12px;text-wrap:balance}
+  p{margin:0 0 18px} p:last-child{margin-bottom:0}
+  .lead{font-size:20px;line-height:1.5}
+  ol.tasks{list-style:none;counter-reset:t;margin:0;padding:0;display:flex;flex-direction:column;gap:28px}
+  ol.tasks > li{counter-increment:t;padding-left:44px;position:relative}
+  ol.tasks > li::before{content:counter(t,decimal-leading-zero);position:absolute;left:0;top:1px;
+    font-family:var(--mono);font-size:12px;color:var(--copper);letter-spacing:.04em;
+    border:1px solid #e3c4b4;border-radius:2px;padding:2px 6px;background:#f7ece6}
+  ol.tasks .name{font-weight:600}
+  pre{font-family:var(--mono);font-size:13px;line-height:1.6;background:#fff;
+    border:1px solid var(--rule);border-left:2px solid var(--copper);border-radius:2px;
+    padding:15px 17px;margin:14px 0 0;overflow-x:auto;color:#2b2620;font-variant-ligatures:none}
+  pre .c{color:var(--gray)}
+  figure{margin:26px 0 6px}
+  figure img,figure svg.grammar{display:block;width:100%;height:auto;border:2px solid var(--ink);background:#fff}
+  figcaption{font-family:var(--mono);font-size:12px;line-height:1.5;color:var(--olive);margin-top:9px}
+  figcaption b{color:var(--ink);font-weight:600}
+  blockquote{margin:0;padding:2px 0 2px 18px;border-left:2px solid var(--copper);
+    font-style:italic;color:#33302a;font-size:20px;line-height:1.45}
+  .tablewrap{overflow-x:auto;margin:18px 0 6px}
+  table{border-collapse:collapse;width:100%;font-size:15px;font-variant-numeric:tabular-nums}
+  th,td{text-align:left;padding:8px 14px 8px 0;border-bottom:1px solid var(--rule)}
+  thead th{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--olive);font-weight:600;border-bottom:1.5px solid var(--ink)}
+  td.num,th.num{text-align:right;padding-right:18px}
+  a{color:var(--copper);text-decoration-thickness:1px;text-underline-offset:2px}
+  a.cite{color:var(--olive);text-decoration:none;border-bottom:1px dotted var(--gray);white-space:nowrap}
+  a.cite:hover{color:var(--copper);border-bottom-color:var(--copper)}
+  ol.refs{font-size:14.5px;line-height:1.5;padding-left:22px;display:flex;flex-direction:column;gap:11px;color:#33302a}
+  ol.refs li{padding-left:4px}
+  ol.refs a{word-break:break-word}
+  footer{padding:38px 0 88px;color:var(--olive);font-family:var(--mono);font-size:12px;
+    letter-spacing:.02em;border-top:1px solid var(--rule);margin-top:6px}
+  ::selection{background:var(--copper);color:#fff}
+  @media (max-width:560px){ body{font-size:17px} header{padding-top:52px} .wrap{padding:0 22px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Explorations into (LLM) spatial reasoning with design patents</h1>
+    <div class="byline"><span>Hamidah Oderinwale</span><span>May 2026</span></div>
+    <span class="status">Working draft &middot; paper in preparation</span>
+    <div class="topline"></div>
+  </header>
+
+  <section>
+    <h2><span class="n">&sect;1</span> Validating the bitter lesson</h2>
+    <p class="lead">In this work, we study structural reasoning in the context of patent and technical design understanding. Our contributions include several novel task types that benchmark capabilities needed for strong agentic performance in physical design domains.</p>
+    <p>For each task, we experiment with multiple representations of the underlying information. We are interested not only in which models perform best, but how the way the information they are presented and asked to present is structured. To do this, we also release a gym environment with design patent figures as states, a DSL action space for composing figures, gradeable spatial reasoning tasks that provide verifiable rewards, and a renderer that turns the DSL into a visual form.</p>
+    <p>In general, we find that representational interventions can equip models with the support they need to perform on tasks that require spatial understanding, however, it is important to be intentional about the types of representations and when they are implemented. In our view, spatial reasoning can be decomposed into two parts: categorical and geometric thinking. Categorical thinking &mdash; where a model, for example, should identify the correct viewpoints from a set &mdash; is best supported via test-time reasoning, whereas geometric thinking likely needs to be imbued in a model during early stages (i.e. training).</p>
+  </section>
+
+  <section>
+    <h2><span class="n">&sect;2</span> Why we use design patents to probe into spatial reasoning</h2>
+    <p>We view patents and their figures as a rich data source given their ground truth and real-world implications for relational structural understanding in a visual domain. Patent analysts and inventors ask questions relevant to anyone building generatively: how similar is what I&rsquo;m building to existing tools? How do I build cumulatively without redundant work? And what should I add next? We use these as the basis for our task design. For agents to be true builders, they should understand how their outputs fit into the existing innovation landscape and situate their generations within that context.</p>
+    <figure>
+      <img src="figures/viewset_D1009512.png" alt="A cleaning tool rack shown across six viewpoints: two isometric views, a top plan, a section, a rear elevation, and a bottom plan.">
+      <figcaption><b>Fig. 1.</b> Sample figure for a cleaning tool rack with all viewpoints displayed.</figcaption>
+    </figure>
+    <h3>Our findings</h3>
+    <p>Overall, we find that models have the necessary knowledge but struggle to apply it in physical domains. That is, they can describe what they should do but struggle to execute. We use Locarno classifications to understand whether different types of design are more difficult for models.</p>
+  </section>
+
+  <section>
+    <h2><span class="n">&sect;3</span> Tasks</h2>
+    <ol class="tasks">
+      <li>
+        <p><span class="name">Masked view.</span> For this task, we try to assess models&rsquo; ability to determine the viewpoint of a given figure. This task is structured where the figures of a patent are described, all but one have their viewpoints written out and the remaining one does not. From this, the model has to write out the viewpoint of the masked figure.</p>
+<pre>FIG. 1 is a perspective view thereof.
+FIG. 2 is a ____ view thereof.    <span class="c">(masked; target: front elevation)</span>
+FIG. 3 is a rear elevational view thereof.</pre>
+      </li>
+      <li>
+        <p><span class="name">Figure retrieval.</span> For this task, we split it into two parts: first, we identify whether models can find the correct figure from a set of figures drawn from various patents (i.e., other objects); second, we identify whether models can find the right view of a given object among its other views, which are similar in embedding space.</p>
+<pre>Part 1 (across patents): query = front elevation of a beverage container
+  [A] front elevation of a desk lamp        <span class="c">(other object)</span>
+  [B] perspective of a hinge bracket        <span class="c">(other object)</span>
+  [C] front elevation of a beverage container <span class="c">&lt;- target</span>
+
+Part 2 (within object): query = &quot;rear elevation&quot; of object D1023456
+  candidates = its own sibling views {perspective, front, top, rear*}
+  target = rear   <span class="c">(* nearest neighbors in CLIP space, hardest distractors)</span></pre>
+      </li>
+      <li>
+        <p><span class="name">Intent elicitation.</span> With this task, we ask whether drawing descriptions can be mapped to design intent. We give a structured schema and employ token overlap (F1) as our measure for accuracy. Here, we ask whether the model can produce coherent explanations of designs instead of only summarizing the description <a class="cite" href="#ref-mccarthy2024">McCarthy et al., 2024</a>. We use this task, in particular, to probe into how models reason.</p>
+<pre>Input (drawing description): &quot;FIG. 1 is a perspective view of a folding
+  chair; FIG. 2 is a side elevational view thereof; ...&quot;
+Output (filled schema):
+  viewpoint_set  : [perspective, front, side, top]
+  primary_view   : perspective
+  component_vocab: [seat, backrest, legs, hinge]
+  spatial_layout : &quot;hinged seat and backrest over four folding legs&quot;
+  design_intent  : &quot;a collapsible chair for compact storage&quot;</pre>
+      </li>
+      <li>
+        <p><span class="name">Agent-to-agent communication.</span> We view a model&rsquo;s ability to express its work and outputs as a pre-cursor to collaborating and iterating in offline settings. For this task, two agents form a dyad and play a reference game adapted from the procedural-abstraction communication setup of McCarthy et al.&nbsp;<a class="cite" href="#ref-mccarthy2021">(2021)</a>, in which agent&nbsp;A is given a patent figure and expresses its design in natural language to agent&nbsp;B, who must reconstruct it. We run this under two conditions, viewpoint-aware and viewpoint-agnostic.</p>
+<pre>Designer (sees target view): &quot;A perspective view of a cylindrical bottle
+  with a ribbed cap and a tapered neck.&quot;
+Maker (sees a pool of candidate figures, no labels): picks 1 of N
+Score: 1 if Maker&rsquo;s pick == Designer&rsquo;s target, else 0</pre>
+      </li>
+    </ol>
+  </section>
+
+  <section>
+    <h2><span class="n">&sect;4</span> Benchmark construction</h2>
+    <h3>Dataset</h3>
+    <p>We source patents and the corresponding designs from the IMPACT dataset <a class="cite" href="#ref-shomee2024">(Shomee et al., 2024)</a> &mdash; a multi-modal dataset of patents and their figures in paired image&ndash;caption format with accompanying patent metadata including the issuing year, the author, and its description. The dataset includes patents from a 15-year time-span (2007&ndash;2022). We enrich the dataset with data from 2023&ndash;April 2026 and include model-generated descriptions of the images themselves and we gather metadata for the figures including how many there are per patent, the ID, sibling figures and we number the components. For the years we extend, we source the figure images from Google Patents image hosting. In total, we analyze 2.65M patent figures. As part of our processing for this data and as the setup for our tasks we embed each figure with CLIP ViT-L/14, 768-dim.</p>
+    <h3>A graphical DSL</h3>
+    <p>Acknowledging that there was no pre-defined programming language for patent visual reasoning that could be used for our corpus, we induce a DSL directly from the corpus. To induce the grammar, we extract unique terms from each figure&rsquo;s description and attach each to a &ldquo;projection.&rdquo; In a given patent, the same article &mdash; for example, a hinge bracket &mdash; is shown in a variety of viewpoints (the front view, rear view, and the left and right views). We define each of these viewpoints as leaves in the tree.</p>
+    <p>At the root of the grammar, it breaks down into pictorial and orthographic representations. Pictorial representations refer to images of the figures with depth; orthographic ones are flat and taken head-on (e.g. front, rear, left, right, top, and bottom views). Pictorial views then branch into perspective (representing the figure as it would be perceived from different viewpoints) or isometric (representing the figure at 30 degrees off horizontal on each side, so that scale is preserved).</p>
+    <figure>
+      <img src="figures/pictorial_vs_orthographic.png" alt="A cable fastening clip drawn two ways: pictorial isometric views with depth on the left, and flat orthographic top, bottom, and side views on the right.">
+      <figcaption><b>Fig. 2.</b> Comparison of pictorial and orthographic perspective for a small molded cable clip for cables (Patent D1017555).</figcaption>
+    </figure>
+    <figure>
+      <svg class="grammar" viewBox="0 0 960 285" role="img" aria-label="Hierarchical viewpoint grammar: the root splits into Pictorial (perspective, isometric) and Orthographic (elevation, plan, section).">
+      <path d="M480 46 L480 84 L270 84 L270 120" fill="none" stroke="#5692E5" stroke-width="1.6"/>
+      <path d="M480 46 L480 84 L690 84 L690 120" fill="none" stroke="#20A380" stroke-width="1.6"/>
+      <path d="M270 120 L270 165 L175 165 L175 205" fill="none" stroke="#5692E5" stroke-width="1.6"/>
+      <path d="M270 120 L270 165 L370 165 L370 205" fill="none" stroke="#a9c8f0" stroke-width="1.6"/>
+      <path d="M690 120 L690 165 L560 165 L560 205" fill="none" stroke="#20A380" stroke-width="1.6"/>
+      <path d="M690 120 L690 165 L690 165 L690 205" fill="none" stroke="#8fcdb9" stroke-width="1.6"/>
+      <path d="M690 120 L690 165 L820 165 L820 205" fill="none" stroke="#CB4D20" stroke-width="1.6"/>
+      <circle cx="98" cy="256" r="3" fill="#5692E5" opacity="0.7"/>
+      <circle cx="108" cy="256" r="3" fill="#5692E5" opacity="0.7"/>
+      <circle cx="116" cy="256" r="3" fill="#5692E5" opacity="0.7"/>
+      <circle cx="126" cy="256" r="3" fill="#5692E5" opacity="0.7"/>
+      <circle cx="134" cy="256" r="3" fill="#5692E5" opacity="0.7"/>
+      <circle cx="144" cy="256" r="3" fill="#5692E5" opacity="0.7"/>
+      <circle cx="152" cy="256" r="3" fill="#5692E5" opacity="0.7"/>
+      <circle cx="162" cy="256" r="3" fill="#5692E5" opacity="0.7"/>
+      <circle cx="170" cy="256" r="3" fill="#5692E5" opacity="0.7"/>
+      <circle cx="180" cy="256" r="3" fill="#5692E5" opacity="0.7"/>
+      <circle cx="188" cy="256" r="3" fill="#5692E5" opacity="0.7"/>
+      <circle cx="198" cy="256" r="3" fill="#5692E5" opacity="0.7"/>
+      <circle cx="206" cy="256" r="3" fill="#5692E5" opacity="0.7"/>
+      <circle cx="216" cy="256" r="3" fill="#5692E5" opacity="0.7"/>
+      <circle cx="224" cy="256" r="3" fill="#5692E5" opacity="0.7"/>
+      <circle cx="234" cy="256" r="3" fill="#5692E5" opacity="0.7"/>
+      <circle cx="242" cy="256" r="3" fill="#5692E5" opacity="0.7"/>
+      <circle cx="252" cy="256" r="3" fill="#5692E5" opacity="0.7"/>
+      <circle cx="370" cy="256" r="3" fill="#a9c8f0" opacity="0.7"/>
+      <circle cx="542" cy="256" r="3" fill="#20A380" opacity="0.7"/>
+      <circle cx="551" cy="256" r="3" fill="#20A380" opacity="0.7"/>
+      <circle cx="560" cy="256" r="3" fill="#20A380" opacity="0.7"/>
+      <circle cx="569" cy="256" r="3" fill="#20A380" opacity="0.7"/>
+      <circle cx="578" cy="256" r="3" fill="#20A380" opacity="0.7"/>
+      <circle cx="686" cy="256" r="3" fill="#8fcdb9" opacity="0.7"/>
+      <circle cx="694" cy="256" r="3" fill="#8fcdb9" opacity="0.7"/>
+      <circle cx="820" cy="256" r="3" fill="#CB4D20" opacity="0.7"/>
+      <circle cx="480" cy="46" r="7" fill="#14110E"/>
+      <circle cx="270" cy="120" r="8" fill="#5692E5"/>
+      <text x="270" y="102" fill="#5692E5" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="15" font-weight="600">Pictorial</text>
+      <circle cx="690" cy="120" r="8" fill="#20A380"/>
+      <text x="690" y="102" fill="#20A380" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="15" font-weight="600">Orthographic</text>
+      <circle cx="175" cy="205" r="12" fill="#5692E5"/>
+      <text x="175" y="189" fill="#5692E5" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="15" font-weight="600">Perspective</text>
+      <circle cx="370" cy="205" r="5" fill="#a9c8f0"/>
+      <text x="370" y="189" fill="#a9c8f0" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="15" font-weight="600">Isometric</text>
+      <circle cx="560" cy="205" r="8" fill="#20A380"/>
+      <text x="560" y="189" fill="#20A380" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="15" font-weight="600">Elevation</text>
+      <circle cx="690" cy="205" r="6" fill="#8fcdb9"/>
+      <text x="690" y="189" fill="#8fcdb9" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="15" font-weight="600">Plan</text>
+      <circle cx="820" cy="205" r="5" fill="#CB4D20"/>
+      <text x="820" y="189" fill="#CB4D20" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="15" font-weight="600">Section</text>
+    </svg>
+      <figcaption><b>Fig. 3.</b> The induced hierarchical viewpoint grammar. The node size is proportional to corpus frequency.</figcaption>
+    </figure>
+    <p>Models are given a canvas and essentially a set of shapes and lines forming a total of three primitives (lines, circles, and arcs) that they can use to build figures. The transformation of these primitives into ink on the blank canvas is known as rasterization.</p>
+<pre>D = {
+  l((0.20,0.80),(0.80,0.80)),           <span class="c">% line: two endpoints</span>
+  c((0.40,0.50),(0.60,0.50)),           <span class="c">% circle: diameter endpoints</span>
+  a((0.20,0.30),(0.50,0.45),(0.80,0.30)) <span class="c">% arc: start, mid, end</span>
+}</pre>
+    <figure>
+      <img src="figures/render_loop_triptych.png" alt="Three panels: a target patent figure, then the model's DSL render at turn 0, then a closer render at turn 1.">
+      <figcaption><b>Fig. 4.</b> Rendering-in-the-loop.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2><span class="n">&sect;5</span> Results</h2>
+    <p>We find that models are capable of identifying perspective from flat orthographic views (2D representations, akin to what you would observe if you had scanned a 3D object), but struggle with pictorial views (3D representations, akin to what you would observe if you had taken a picture of a 3D object from an angle). We see that models lack the ability to verify the viewpoints they suggest.</p>
+
+    <h3>Comparing representations</h3>
+    <p>We also explore a notion of &lsquo;format tax.&rsquo; In this work, the DSL also served as a normalizer for the sake of scoring. However, we look at the costs of representation and how lossy it was. Across models we see that different ones are more capable than others at adhering to new languages and learning abstractions. Given the language to describe figures as an input, we see that it costs every model 26&ndash;30 points for accuracy.</p>
+
+    <h3>Text outperforms vision</h3>
+    <p>For fill-in-the-middle (FIM) tasks, we find that natural language representations substantially outperform vision-only approaches. One plausible explanation is that vision-only models encounter a distribution mismatch: technical wireframes and patent figures are relatively uncommon compared to the image distributions on which these models are typically trained.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Setting</th><th class="num">Accuracy</th><th class="num">Random (1/8)</th></tr></thead>
+      <tbody>
+        <tr><td>Masked-view, text</td><td class="num">88&ndash;95%</td><td class="num">12.5%</td></tr>
+        <tr><td>Viewpoint ID, vision-only</td><td class="num">~23%</td><td class="num">12.5%</td></tr>
+        <tr><td>Linear probe (CLIP &rarr; viewpoint)</td><td class="num">43.2% (33.8% bal.)</td><td class="num">12.5%</td></tr>
+      </tbody>
+    </table></div>
+    <figcaption style="font-family:var(--mono);font-size:12px;color:var(--olive)">Viewpoint accessibility by representation; random is uniform chance over the eight viewpoint families (1/8).</figcaption>
+
+    <h3>Probing the model internals</h3>
+    <p>To understand whether pattern-matching is happening in model cognition we use logistic regression to seperate visual features from patent figure images (224&times;224, 50,176 pixels). This provides us a vector representation projected into a lower dimensional space (768 features), where each patch corresponds to a set of pixels from the original space (256 patches of 14&times;14 pixels). We see whether the geometry of this visual space corresponds to the outputs of the model by seeing if they are linearly accessible. We observe that the model has an internal representation of pictorial views with depth but not orthographic ones.</p>
+    <p>We see that information about some views are already in CLIP&rsquo;s features but are not expressed. However, we can double the accuracy of retrieval on new objects by using a lightweight linear probe and simply reading out the encoded knowledge about the perspective (going from 18.9% to 46.9%). This further supports the notion that communication is a core bottleneck for models in spatial reasoning environments rather than their knowledge alone. The Platonic Representation Hypothesis posits that representations for a model across modalities are convergent <a class="cite" href="#ref-huh2024">(Huh et al., 2024)</a>. Experiments from work on the universal geometry of embeddings across architectures also agree <a class="cite" href="#ref-jha2025">(Jha et al., 2025)</a>. However, we argue that viewpoint is a unique dimension such that it requires different internal understanding of the world. While the identity of the object agrees across modalities, there is no shared structure across viewpoints.</p>
+    <p>To check that the orthographic collapse is not an artifact of linear decoding, we re-run the viewpoint probe with a Handa-style 2-layer MLP (one hidden layer, 256 units) on the same frozen CLIP ViT-L/14 features, each with a Hewitt&ndash;Liang shuffled-label control task <a class="cite" href="#ref-hewitt2019">(Hewitt &amp; Liang, 2019)</a>. The collapse persists: the flat orthographic views (front, top, section) stay near-floor under the more expressive probe, overall accuracy rises only +1.7pp, and selectivity increases (+0.20 &rarr; +0.23) &mdash; so the small gains are genuine signal, not the capacity overfitting an MLP can introduce. Viewpoint is weakly recoverable from CLIP linearly and nonlinearly.</p>
+  </section>
+
+  <section>
+    <h2><span class="n">&sect;6</span> Supporting models with anchors</h2>
+    <p>Just as humans have heuristics and cognitive tools to help them navigate the world, we question whether with the right support, models can also reason and to what degree it helps. We provide different anchors to test this. The first anchor is an image of an object of the same view with a description and the prompting question. The second is a landmark, where we have the same two images and instead of asking the model to simply supply the view, we ask it to first identify a distinguishing feature or form of asymmetry to figure out the second image&rsquo;s viewpoint.</p>
+  </section>
+
+  <section>
+    <h2><span class="n">&sect;7</span> Discussion</h2>
+    <blockquote>We find this suite of tasks compelling because domain expertise should not be a prerequisite for success.</blockquote>
+    <p style="margin-top:18px">More broadly, we hope these findings can inform the design of new interfaces for interacting with foundation models, rather than focusing exclusively on measurable model capabilities. While we focus on evaluating models out of the box, future work might look at a broader set of models and their harnesses to emulate real-world conditions. Additionally, many of the tasks we include require compositional understanding of how components fit together in the physical world. It remains unclear, however, whether such understanding depends on visual reasoning and spatial cognition, or whether language and code abstractions alone are sufficient.</p>
+  </section>
+
+  <section>
+    <h2><span class="n">&sect;8</span> References</h2>
+    <ol class="refs">
+      <li id="ref-hewitt2019">Hewitt, J. &amp; Liang, P. (2019). Designing and Interpreting Probes with Control Tasks. <i>EMNLP-IJCNLP</i>. <a href="https://arxiv.org/abs/1909.03368">arXiv:1909.03368</a></li>
+      <li id="ref-huh2024">Huh, M., Cheung, B., Wang, T. &amp; Isola, P. (2024). The Platonic Representation Hypothesis. <i>ICML</i>. <a href="https://arxiv.org/abs/2405.07987">arXiv:2405.07987</a></li>
+      <li id="ref-jha2025">Jha, R., Zhang, C., Shmatikov, V. &amp; Morris, J. X. (2025). Harnessing the Universal Geometry of Embeddings. <i>NeurIPS</i>. <a href="https://arxiv.org/abs/2505.12540">arXiv:2505.12540</a></li>
+      <li id="ref-mccarthy2021">McCarthy, W. P., Hawkins, R. D., Wang, H., Holdaway, C. &amp; Fan, J. E. (2021). Learning to communicate about shared procedural abstractions. <i>Proceedings of the 43rd Annual Conference of the Cognitive Science Society (CogSci)</i>. <a href="https://arxiv.org/abs/2107.00077">arXiv:2107.00077</a></li>
+      <li id="ref-mccarthy2024">McCarthy, W. P., Matejka, J., Willis, K. D. D., Fan, J. E. &amp; Pu, Y. (2024). Communicating design intent using drawing and text. <i>Proceedings of the 16th Conference on Creativity &amp; Cognition</i>, 512&ndash;519.</li>
+      <li id="ref-shomee2024">Shomee, H. H., Wang, Z., Medya, S. &amp; Ravi, S. N. (2024). IMPACT: A Large-scale Integrated Multimodal Patent Analysis and Creation Dataset for Design Patents. <i>NeurIPS Datasets and Benchmarks Track</i>. <a href="https://openreview.net/forum?id=l0Ydsl10ci">OpenReview</a></li>
+    </ol>
+  </section>
+
+  <footer>Hamidah Oderinwale &middot; Working draft &middot; paper in preparation</footer>
+</div>
+</body>
+</html>
