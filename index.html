@@ -223,6 +223,16 @@ Score: 1 if Maker&rsquo;s pick == Designer&rsquo;s target, else 0</pre>
   <section>
     <h2><span class="n">&sect;5</span> Results</h2>
     <p>We find that models are capable of identifying perspective from flat orthographic views (2D representations, akin to what you would observe if you had scanned a 3D object), but struggle with pictorial views (3D representations, akin to what you would observe if you had taken a picture of a 3D object from an angle). We see that models lack the ability to verify the viewpoints they suggest.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Condition</th><th class="num">Similarity</th><th class="num">&Delta;</th></tr></thead>
+      <tbody>
+        <tr><td>Same object, same viewpoint</td><td class="num">0.892</td><td class="num">+0.122</td></tr>
+        <tr><td>Same object, different viewpoint</td><td class="num">0.860</td><td class="num">+0.090</td></tr>
+        <tr><td>Different object, same viewpoint</td><td class="num">0.776</td><td class="num">+0.006</td></tr>
+        <tr><td>Different object, different viewpoint</td><td class="num">0.770</td><td class="num">0.000</td></tr>
+      </tbody>
+    </table></div>
+    <figcaption style="font-family:var(--mono);font-size:12px;line-height:1.5;color:var(--olive)">Mean pairwise cosine similarity in CLIP ViT-L/14 across four conditions. Different-object conditions (C, D) each use n=5,000 sampled pairs per year; same-object conditions (A, B) use all available within-patent pairs (n &le; 15/year). Object identity explains an effect (+0.090) 15&times; larger than shared viewpoint (+0.006).</figcaption>
 
     <h3>Comparing representations</h3>
     <p>We also explore a notion of &lsquo;format tax.&rsquo; In this work, the DSL also served as a normalizer for the sake of scoring. However, we look at the costs of representation and how lossy it was. Across models we see that different ones are more capable than others at adhering to new languages and learning abstractions. Given the language to describe figures as an input, we see that it costs every model 26&ndash;30 points for accuracy.</p>
