@@ -54,28 +54,13 @@
     font-variant-ligatures:none}
   pre .c{color:var(--gray)}
   figure{margin:26px 0 6px}
-  figure img,figure svg.chart{display:block;width:100%;height:auto;
+  figure img,figure svg.chart,figure svg.grammar{display:block;width:100%;height:auto;
     background:var(--box);border-radius:5px;padding:12px}
-  svg.chart text{font-family:var(--mono)}
+  svg.chart text,svg.grammar text{font-family:var(--mono)}
   .legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:11px;
     font-family:var(--mono);font-size:12px;color:#33302a}
   .legend span{display:inline-flex;align-items:center;gap:7px}
   .legend i{width:16px;height:3px;border-radius:2px;display:inline-block}
-  /* induced-grammar component (real HTML, not baked SVG text) */
-  .grammar{background:var(--box);border-radius:5px;padding:16px 20px;display:flex;
-    flex-direction:column;gap:2px}
-  .grammar .ghead{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.08em;
-    margin:13px 0 5px}
-  .grammar .ghead:first-child{margin-top:0}
-  .grammar .grow{display:grid;grid-template-columns:26px 116px 1fr auto;align-items:center;
-    gap:12px;padding:3px 0}
-  .grammar .gdot{border-radius:50%;justify-self:center}
-  .grammar .gname{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--ink)}
-  .grammar .gbar{height:13px;border-radius:3px;background:rgba(20,17,14,.05);overflow:hidden}
-  .grammar .gbar i{display:block;height:100%;border-radius:3px;opacity:.9}
-  .grammar .gval{font-family:var(--mono);font-size:11px;color:var(--olive);white-space:nowrap}
-  @media(max-width:560px){.grammar .grow{grid-template-columns:22px 1fr auto;gap:9px}
-    .grammar .gbar{display:none}}
   .example{background:var(--box);border-radius:5px;padding:17px 19px;margin:18px 0 6px}
   .exlabel{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
     color:var(--olive);margin-bottom:11px}
@@ -217,15 +202,35 @@ Score: 1 if Maker&rsquo;s pick == Designer&rsquo;s target, else 0</pre>
       <figcaption><b>Fig. 2.</b> Comparison of pictorial and orthographic perspective for a small molded cable clip for cables (Patent D1017555).</figcaption>
     </figure>
     <figure>
-      <div class="grammar">
-      <div class="ghead" style="color:#5692E5">PICTORIAL</div>
-      <div class="grow"><span class="gdot" style="width:19px;height:19px;background:#5692E5"></span><span class="gname">Perspective</span><span class="gbar"><i style="width:92.3%;background:#5692E5"></i></span><span class="gval">49,841 &middot; 17 views</span></div>
-      <div class="grow"><span class="gdot" style="width:8px;height:8px;background:#a9c8f0"></span><span class="gname">Isometric</span><span class="gbar"><i style="width:1.3%;background:#a9c8f0"></i></span><span class="gval">675 &middot; 1 view</span></div>
-      <div class="ghead" style="color:#20A380">ORTHOGRAPHIC</div>
-      <div class="grow"><span class="gdot" style="width:20px;height:20px;background:#20A380"></span><span class="gname">Elevation</span><span class="gbar"><i style="width:100.0%;background:#20A380"></i></span><span class="gval">53,988 &middot; 5 views</span></div>
-      <div class="grow"><span class="gdot" style="width:17px;height:17px;background:#8fcdb9"></span><span class="gname">Plan</span><span class="gbar"><i style="width:56.3%;background:#8fcdb9"></i></span><span class="gval">30,394 &middot; 2 views</span></div>
-      <div class="grow"><span class="gdot" style="width:7px;height:7px;background:#8a3ffc"></span><span class="gname">Section</span><span class="gbar"><i style="width:1.1%;background:#8a3ffc"></i></span><span class="gval">604 &middot; 1 view</span></div>
-      </div>
+      <svg class="grammar" viewBox="0 0 680 198" role="img" aria-label="Induced viewpoint grammar as a tree: root splits into Pictorial (perspective 17 views, isometric 1 view) and Orthographic (elevation 5 views, plan 2 views, section 1 view); node size encodes corpus frequency.">
+      <path d="M336 30 L336 60 L155 60 L155 94" fill="none" stroke="#5692E5" stroke-width="1.3" opacity="0.7"/>
+      <path d="M336 30 L336 60 L517 60 L517 94" fill="none" stroke="#20A380" stroke-width="1.3" opacity="0.7"/>
+      <path d="M155 94 L155 130 L80 130 L80 166" fill="none" stroke="#5692E5" stroke-width="1.3" opacity="0.7"/>
+      <path d="M155 94 L155 130 L230 130 L230 166" fill="none" stroke="#a9c8f0" stroke-width="1.3" opacity="0.7"/>
+      <path d="M517 94 L517 130 L400 130 L400 166" fill="none" stroke="#20A380" stroke-width="1.3" opacity="0.7"/>
+      <path d="M517 94 L517 130 L520 130 L520 166" fill="none" stroke="#8fcdb9" stroke-width="1.3" opacity="0.7"/>
+      <path d="M517 94 L517 130 L630 130 L630 166" fill="none" stroke="#8a3ffc" stroke-width="1.3" opacity="0.7"/>
+      <circle cx="336" cy="30" r="5" fill="#14110E"/>
+      <circle cx="155" cy="94" r="7.3" fill="#5692E5"/>
+      <text x="155" y="79.7" text-anchor="middle" fill="#5692E5" font-size="13" font-weight="700">Pictorial</text>
+      <circle cx="517" cy="94" r="8.8" fill="#20A380"/>
+      <text x="517" y="78.2" text-anchor="middle" fill="#20A380" font-size="13" font-weight="700">Orthographic</text>
+      <circle cx="80" cy="166" r="7.3" fill="#5692E5"/>
+      <text x="80" y="151.7" text-anchor="middle" fill="#14110E" font-size="13" font-weight="600">Perspective</text>
+      <text x="80" y="186.3" text-anchor="middle" fill="#585E53" font-size="10">17 views</text>
+      <circle cx="230" cy="166" r="3.1" fill="#a9c8f0"/>
+      <text x="230" y="155.9" text-anchor="middle" fill="#14110E" font-size="13" font-weight="600">Isometric</text>
+      <text x="230" y="182.1" text-anchor="middle" fill="#585E53" font-size="10">1 view</text>
+      <circle cx="400" cy="166" r="7.5" fill="#20A380"/>
+      <text x="400" y="151.5" text-anchor="middle" fill="#14110E" font-size="13" font-weight="600">Elevation</text>
+      <text x="400" y="186.5" text-anchor="middle" fill="#585E53" font-size="10">5 views</text>
+      <circle cx="520" cy="166" r="6.3" fill="#8fcdb9"/>
+      <text x="520" y="152.7" text-anchor="middle" fill="#14110E" font-size="13" font-weight="600">Plan</text>
+      <text x="520" y="185.3" text-anchor="middle" fill="#585E53" font-size="10">2 views</text>
+      <circle cx="630" cy="166" r="3.0" fill="#8a3ffc"/>
+      <text x="630" y="156.0" text-anchor="middle" fill="#14110E" font-size="13" font-weight="600">Section</text>
+      <text x="630" y="182.0" text-anchor="middle" fill="#585E53" font-size="10">1 view</text>
+    </svg>
       <figcaption><b>Fig. 3.</b> The induced hierarchical viewpoint grammar. The node size is proportional to corpus frequency.</figcaption>
     </figure>
     <p>Models are given a canvas and essentially a set of shapes and lines forming a total of three primitives (lines, circles, and arcs) that they can use to build figures. The transformation of these primitives into ink on the blank canvas is known as rasterization.</p>
