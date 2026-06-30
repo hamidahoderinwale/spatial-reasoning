@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rotation & reflection playgrounds — SO(2) / SO(3)</title>
+<meta name="description" content="Interactive playgrounds for rotation vs reflection (chirality) in 2D and 3D, with the oracle/verifier ladder.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F7F5F2; --ink:#14110E; --accent:#0f62fe; --olive:#585E53; --box:#fff;
+    --serif:'Source Serif 4',Georgia,serif; --mono:'Source Code Pro',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);padding:24px 20px 40px}
+  .wrap{max-width:1080px;margin:0 auto}
+  h1{font-size:21px;font-weight:600;margin:0 0 3px}
+  .sub{color:var(--olive);font-size:14px;margin:0 0 18px;max-width:70ch}
+  .bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .tab{font-family:var(--mono);font-size:13px;padding:8px 16px;border:none;border-radius:8px;background:#e9e6e0;color:#222;cursor:pointer}
+  .tab.on{background:var(--accent);color:#fff}
+  .spacer{flex:1}
+  .expand{font-family:var(--mono);font-size:12.5px;color:var(--accent);text-decoration:none;padding:8px 12px;border-radius:8px;background:#e7eefc}
+  .expand:hover{background:#dbe6fb}
+  .frame{width:100%;height:1180px;border:0;border-radius:10px;background:var(--box)}
+  footer{font-family:var(--mono);font-size:11.5px;color:var(--olive);margin-top:14px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Rotation &amp; reflection playgrounds</h1>
+  <p class="sub">Rotation vs reflection &mdash; the chirality bit (det&nbsp;=&nbsp;+1 vs &minus;1) &mdash; with the oracle/verifier ladder, in two spaces. Each opens on a mirror so the dissociation is visible immediately.</p>
+
+  <div class="bar">
+    <button class="tab on" data-src="so2.html">SO(2) &middot; planar</button>
+    <button class="tab" data-src="so3.html">SO(3) &middot; 3D</button>
+    <span class="spacer"></span>
+    <a id="expand" class="expand" href="so2.html" target="_blank" rel="noopener">&#8599; open full page</a>
+  </div>
+
+  <iframe id="frame" class="frame" src="so2.html" title="rotation and reflection playground" loading="lazy"></iframe>
+
+  <footer>Source: spatial-reasoning/playground · D3 · self-contained</footer>
+</div>
+<script>
+(function(){
+  var f=document.getElementById('frame'), ex=document.getElementById('expand');
+  document.querySelectorAll('.tab').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
+      b.classList.add('on');
+      f.src=b.dataset.src; ex.href=b.dataset.src;
+    });
+  });
+})();
+</script>
+</body>
+</html>
