@@ -127,7 +127,8 @@
 
   <section id="playground">
     <h2><span class="n">&#9658;</span> Interactive playground</h2>
-    <!-- PROSE TODO (author): framing for the rotation/reflection geometric-reasoning probe and the oracle/verifier ladder. The SO(2) tab is the orthographic (planar) case; SO(3) is the pictorial (3D) case. -->
+    <p class="lead">The playground below lets you try the task we give the models: decide whether one shape is another rotated, or its mirror image. The SO(2) tab is the orthographic, planar case, with shapes spun in a flat plane; the SO(3) tab is the pictorial, three-dimensional case, with objects turned freely in space.</p>
+    <p>As you change a shape, watch how three graders score the answer: a strict one that checks the true geometry, a middle one that checks a rotation-invariant shortcut that is blind to handedness, and a loose one that rewards confident-looking answers. The point is to feel directly how much the grader you optimize against decides whether getting better means getting the geometry right or just satisfying the check.</p>
     <div class="pg-bleed">
       <div class="pg-tabs">
         <button class="pg-tab on" data-src="playground/so2.html">SO(2) &middot; orthographic plane</button>
@@ -148,6 +149,7 @@
   <section>
     <h2 id="s1"><span class="n">&sect;1</span> Validating the bitter lesson</h2>
     <p class="lead">In this work, we study structural reasoning in the context of patent and technical design understanding. Our contributions include several novel task types that benchmark capabilities needed for strong agentic performance in physical design domains.</p>
+    <p>We think this work is interesting as people prompt to orient digital objects in their generations, models' ability to apply spatial reasoning will be tested and we want to see to what extent it is possessed.</p>
     <p>For each task, we experiment with multiple representations of the underlying information. We are interested not only in which models perform best, but how the way the information they are presented and asked to present is structured. To do this, we also release a gym environment with design patent figures as states, a <a href="https://en.wikipedia.org/wiki/Domain-specific_language">DSL</a> action space for composing figures, gradeable spatial reasoning tasks that provide verifiable rewards, and a renderer that turns the DSL into a visual form.</p>
     <p>In general, we find that representational interventions can equip models with the support they need to perform on tasks that require spatial understanding, however, it is important to be intentional about the types of representations and when they are implemented. In our view, spatial reasoning can be decomposed into two parts: categorical and geometric thinking. Categorical thinking &mdash; where a model, for example, should identify the correct viewpoints from a set &mdash; is best supported via test-time reasoning, whereas geometric thinking likely needs to be imbued in a model during early stages (i.e. training).</p>
   </section>
