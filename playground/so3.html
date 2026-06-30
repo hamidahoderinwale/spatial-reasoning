@@ -75,6 +75,10 @@
       </div>
       <svg id="canvas" width="540" height="540"></svg>
       <div id="figcap" class="note" style="margin-top:6px;min-height:16px"></div>
+      <div id="patentref" style="display:none;margin-top:8px;align-items:flex-start;gap:12px">
+        <img src="patent_D949851.png" alt="US D949,851 FIG.1" style="height:120px;background:#fff;border-radius:6px;padding:8px">
+        <div class="note" style="margin:0">actual figure · US&nbsp;D949,851 FIG.&nbsp;1 (Mitutoyo, 2022; public domain, USPTO). The 3-D wireframe above is a stylized stand-in for it.</div>
+      </div>
       <div class="slider-label">ROTATE B · DEGREES</div>
       <div class="slider"><span>θx</span><input id="sx" type="range" min="-180" max="180" value="0"><b id="vx">0°</b></div>
       <div class="slider"><span>θy</span><input id="sy" type="range" min="-180" max="180" value="0"><b id="vy">0°</b></div>
@@ -316,6 +320,7 @@ d3.selectAll('button.shape').on('click',function(){fig=normShape(FIGS[this.datas
   d3.select('#figcap').html(this.dataset.shape==='patent'
     ? 'US D949,851 — “Data reader” · stylized 3D wireframe stand-in (dataset has no vector geometry), not the patent’s actual figure'
     : '');
+  d3.select('#patentref').style('display', this.dataset.shape==='patent' ? 'flex' : 'none');
   draw();});
 d3.selectAll('button.lens').on('click',function(){lens=this.dataset.lens;
   d3.selectAll('button.lens').classed('on',false);d3.select(this).classed('on',true);draw();});

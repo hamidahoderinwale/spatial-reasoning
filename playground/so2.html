@@ -78,6 +78,10 @@
       </div>
       <svg id="canvas" width="540" height="540"></svg>
       <div id="figcap" class="note" style="margin-top:6px;min-height:16px"></div>
+      <div id="patentref" style="display:none;margin-top:8px;align-items:flex-start;gap:12px">
+        <img src="patent_D949851.png" alt="US D949,851 FIG.1" style="height:120px;background:#fff;border-radius:6px;padding:8px">
+        <div class="note" style="margin:0">actual figure · US&nbsp;D949,851 FIG.&nbsp;1 (Mitutoyo, 2022; public domain, USPTO). The 2-D outline above is a stylized stand-in for it.</div>
+      </div>
       <div class="btns" style="margin-top:8px">
         <button data-preset="id">identity</button>
         <button data-preset="r30">rotate 30&deg;</button>
@@ -385,6 +389,7 @@ d3.selectAll('button.shape').on('click',function(){
   d3.select('#figcap').html(this.dataset.shape==='patent'
     ? 'US D949,851 — “Data reader” · stylized wireframe stand-in (dataset has no vector geometry), not the patent’s actual drawing'
     : '');
+  d3.select('#patentref').style('display', this.dataset.shape==='patent' ? 'flex' : 'none');
   draw();
 });
 d3.selectAll('button.ans').on('click',function(){
