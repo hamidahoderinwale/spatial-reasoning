@@ -33,6 +33,9 @@
   .siglabel{color:var(--muted);font-size:12.5px;margin-bottom:3px}
   .sig{font-family:var(--mono);font-size:13px;color:#333;letter-spacing:.3px;word-spacing:3px;display:block}
   .note{font-size:13px;color:var(--muted);margin-top:8px}
+  .patent-inset{position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.93);border-radius:8px;padding:9px;text-align:center;pointer-events:none}
+  .patent-inset img{display:block;height:140px;margin:0 auto;background:#fff;border-radius:4px}
+  .patent-inset .cap{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:6px;max-width:150px;line-height:1.35}
   .pill{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:20px;background:#eceae5;color:#444;margin-left:8px;vertical-align:middle}
   .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
   button{font-family:var(--serif);font-size:13px;padding:6px 12px;border:none;border-radius:8px;background:#eceae5;color:#222;cursor:pointer}
@@ -63,7 +66,7 @@
 </head>
 <body>
   <h1>SO(3) playground</h1>
-  <p class="sub">The pictorial counterpart to the SO(2) tool. <b>Drag the scene to orbit</b>; rotate B with the sliders; toggle <b>mirror</b>. A proper rotation (det&nbsp;=&nbsp;+1) keeps B congruent to A (&ldquo;same&rdquo;); a reflection (det&nbsp;=&nbsp;&minus;1) is the enantiomer no rotation can superimpose (&ldquo;mirror&rdquo;). The det sign is the chirality bit.</p>
+  <p class="sub">Rotation vs reflection in 3-D. <b>det&nbsp;=&nbsp;+1</b> &rarr; a rotation, so B is the <b>same</b> object; <b>det&nbsp;=&nbsp;&minus;1</b> &rarr; a mirror &mdash; the enantiomer no rotation can match. That sign is the chirality bit.</p>
 
   <div class="wrap">
     <div class="stage">
@@ -73,12 +76,15 @@
         <button class="shape" data-shape="screw" title="Chiral screw tetracube (4 cubes) — connects to the polycube task">screw tetracube</button>
         <button class="shape" data-shape="patent" title="US D949,851 — &quot;Data reader&quot; (2022) · stylized 3D stand-in; dataset has no vector geometry">patent part</button>
       </div>
-      <svg id="canvas" width="540" height="540"></svg>
-      <div id="figcap" class="note" style="margin-top:6px;min-height:16px"></div>
-      <div id="patentref" style="display:none;margin-top:8px;align-items:flex-start;gap:12px">
-        <img src="patent_D949851.png" alt="US D949,851 FIG.1" style="height:120px;background:#fff;border-radius:6px;padding:8px">
-        <div class="note" style="margin:0">actual figure · US&nbsp;D949,851 FIG.&nbsp;1 (Mitutoyo, 2022; public domain, USPTO). The 3-D wireframe above is a stylized stand-in for it.</div>
+      <div style="position:relative">
+        <svg id="canvas" width="540" height="540"></svg>
+        <div id="patentref" class="patent-inset" style="display:none">
+          <img src="patent_D949851.png" alt="US D949,851 FIG.1">
+          <div class="cap">US D949,851 · FIG. 1<br>the real figure (public domain)</div>
+        </div>
       </div>
+      <div class="note" style="margin-top:6px">Drag to orbit · θ sliders rotate B · <b>toggle mirror</b> flips chirality.</div>
+      <div id="figcap" class="note" style="margin-top:4px;min-height:16px"></div>
       <div class="slider-label">ROTATE B · DEGREES</div>
       <div class="slider"><span>θx</span><input id="sx" type="range" min="-180" max="180" value="0"><b id="vx">0°</b></div>
       <div class="slider"><span>θy</span><input id="sy" type="range" min="-180" max="180" value="0"><b id="vy">0°</b></div>
@@ -320,7 +326,7 @@ d3.selectAll('button.shape').on('click',function(){fig=normShape(FIGS[this.datas
   d3.select('#figcap').html(this.dataset.shape==='patent'
     ? 'US D949,851 — “Data reader” · stylized 3D wireframe stand-in (dataset has no vector geometry), not the patent’s actual figure'
     : '');
-  d3.select('#patentref').style('display', this.dataset.shape==='patent' ? 'flex' : 'none');
+  d3.select('#patentref').style('display', this.dataset.shape==='patent' ? 'block' : 'none');
   draw();});
 d3.selectAll('button.lens').on('click',function(){lens=this.dataset.lens;
   d3.selectAll('button.lens').classed('on',false);d3.select(this).classed('on',true);draw();});

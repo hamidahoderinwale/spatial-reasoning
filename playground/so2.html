@@ -49,6 +49,9 @@
   .promptbtn{display:block;width:100%;margin-top:14px;font-family:var(--mono);font-size:12.5px;letter-spacing:.02em;padding:10px;border:none;border-radius:8px;background:#e7eefc;color:var(--blue);cursor:pointer;font-weight:600}
   .promptbtn:hover{background:#dbe6fb}
   .note{font-size:13px;color:var(--muted);margin-top:8px}
+  .patent-inset{position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.93);border-radius:8px;padding:9px;text-align:center;pointer-events:none}
+  .patent-inset img{display:block;height:140px;margin:0 auto;background:#fff;border-radius:4px}
+  .patent-inset .cap{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:6px;max-width:150px;line-height:1.35}
   .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
   button{font-family:var(--serif);font-size:13px;padding:6px 12px;border:none;border-radius:8px;
          background:#eceae5;color:#222;cursor:pointer}
@@ -76,12 +79,14 @@
         <button class="shape" data-shape="ltet" title="L-tromino polyomino — nods to the polycube task (generic)">L-piece</button>
         <button class="shape" data-shape="patent" title="US D949,851 — &quot;Data reader&quot; (2022) · stylized stand-in; dataset has no vector geometry">patent part</button>
       </div>
-      <svg id="canvas" width="540" height="540"></svg>
-      <div id="figcap" class="note" style="margin-top:6px;min-height:16px"></div>
-      <div id="patentref" style="display:none;margin-top:8px;align-items:flex-start;gap:12px">
-        <img src="patent_D949851.png" alt="US D949,851 FIG.1" style="height:120px;background:#fff;border-radius:6px;padding:8px">
-        <div class="note" style="margin:0">actual figure · US&nbsp;D949,851 FIG.&nbsp;1 (Mitutoyo, 2022; public domain, USPTO). The 2-D outline above is a stylized stand-in for it.</div>
+      <div style="position:relative">
+        <svg id="canvas" width="540" height="540"></svg>
+        <div id="patentref" class="patent-inset" style="display:none">
+          <img src="patent_D949851.png" alt="US D949,851 FIG.1">
+          <div class="cap">US D949,851 · FIG. 1<br>the real figure (public domain)</div>
+        </div>
       </div>
+      <div id="figcap" class="note" style="margin-top:6px;min-height:16px"></div>
       <div class="btns" style="margin-top:8px">
         <button data-preset="id">identity</button>
         <button data-preset="r30">rotate 30&deg;</button>
@@ -389,7 +394,7 @@ d3.selectAll('button.shape').on('click',function(){
   d3.select('#figcap').html(this.dataset.shape==='patent'
     ? 'US D949,851 — “Data reader” · stylized wireframe stand-in (dataset has no vector geometry), not the patent’s actual drawing'
     : '');
-  d3.select('#patentref').style('display', this.dataset.shape==='patent' ? 'flex' : 'none');
+  d3.select('#patentref').style('display', this.dataset.shape==='patent' ? 'block' : 'none');
   draw();
 });
 d3.selectAll('button.ans').on('click',function(){
