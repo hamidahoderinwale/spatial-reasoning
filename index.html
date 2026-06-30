@@ -94,6 +94,13 @@
     letter-spacing:.02em;margin-top:20px}
   ::selection{background:var(--accent);color:#fff}
   @media (max-width:560px){ body{font-size:17px} header{padding-top:52px} .wrap{padding:0 22px} }
+  /* interactive playground embed */
+  section#playground .pg-bleed{position:relative;left:50%;transform:translateX(-50%);width:min(1060px,96vw);margin-top:6px}
+  section#playground iframe{width:100%;height:1100px;border:0;border-radius:6px;background:var(--box)}
+  .pg-tabs{display:flex;gap:8px;margin-bottom:12px;justify-content:center}
+  .pg-tab{font-family:var(--mono);font-size:13px;padding:6px 14px;border:0;border-radius:6px;background:#e9e6e0;color:#222;cursor:pointer}
+  .pg-tab.on{background:var(--accent);color:#fff}
+  .pg-fallback{font-family:var(--mono);font-size:12px;margin-top:10px;text-align:center;color:var(--olive)}
 </style>
 </head>
 <body>
@@ -106,6 +113,7 @@
   <nav class="toc">
     <div class="tl">Contents</div>
     <ol>
+      <li><a href="#playground"><span class="n">&#9658;</span> Interactive playground</a></li>
       <li><a href="#s1"><span class="n">&sect;1</span> Validating the bitter lesson</a></li>
       <li><a href="#s2"><span class="n">&sect;2</span> Why we use design patents to probe into spatial reasoning</a></li>
       <li><a href="#s3"><span class="n">&sect;3</span> Tasks</a></li>
@@ -116,6 +124,26 @@
       <li><a href="#s8"><span class="n">&sect;8</span> References</a></li>
     </ol>
   </nav>
+
+  <section id="playground">
+    <h2><span class="n">&#9658;</span> Interactive playground</h2>
+    <!-- PROSE TODO (author): framing for the rotation/reflection geometric-reasoning probe and the oracle/verifier ladder. The SO(2) tab is the orthographic (planar) case; SO(3) is the pictorial (3D) case. -->
+    <div class="pg-bleed">
+      <div class="pg-tabs">
+        <button class="pg-tab on" data-src="playground/so2.html">SO(2) &middot; orthographic plane</button>
+        <button class="pg-tab" data-src="playground/so3.html">SO(3) &middot; pictorial 3D</button>
+      </div>
+      <iframe id="pgframe" src="playground/so2.html" title="rotation and reflection playground" loading="lazy"></iframe>
+      <p class="pg-fallback"><a href="playground/so2.html" target="_blank" rel="noopener">open in a new tab &rarr;</a></p>
+    </div>
+    <script>
+    (function(){var f=document.getElementById('pgframe');
+      document.querySelectorAll('.pg-tab').forEach(function(b){b.addEventListener('click',function(){
+        document.querySelectorAll('.pg-tab').forEach(function(t){t.classList.remove('on');});
+        b.classList.add('on'); f.src=b.dataset.src;
+        document.querySelector('.pg-fallback a').href=b.dataset.src;});});})();
+    </script>
+  </section>
 
   <section>
     <h2 id="s1"><span class="n">&sect;1</span> Validating the bitter lesson</h2>

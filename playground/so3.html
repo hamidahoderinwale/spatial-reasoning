@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SO(3) playground · 3D rotation vs reflection = the chirality bit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  :root{
+    --paper:#F7F5F2; --box:#fff; --ink:#1a1a1a; --muted:#6b6b6b;
+    --blue:#0f62fe; --red:#da1e28; --grid:#e6e2dc;
+    --serif:'Source Serif 4',Georgia,serif; --mono:'Source Code Pro',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);line-height:1.45;padding:28px 24px 60px}
+  h1{font-size:21px;font-weight:600;margin:0 0 2px}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 22px;max-width:760px}
+  .wrap{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start;max-width:1080px}
+  .stage{background:var(--box);border-radius:14px;padding:14px}
+  svg{display:block;border-radius:8px;background:#fbfaf8;cursor:grab}
+  svg.drag{cursor:grabbing}
+  .side{flex:1;min-width:320px;display:flex;flex-direction:column;gap:14px}
+  .card{background:var(--box);border-radius:14px;padding:16px 18px}
+  .card h2{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0 0 10px}
+  .det{font-family:var(--mono);font-size:34px;font-weight:600;line-height:1}
+  .verdict{font-size:15px;margin-top:8px;font-weight:600}
+  .row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:13px;padding:3px 0;color:#333}
+  .row span:first-child{color:var(--muted);font-family:var(--serif)}
+  .sigrow{margin-bottom:9px}
+  .siglabel{color:var(--muted);font-size:12.5px;margin-bottom:3px}
+  .sig{font-family:var(--mono);font-size:13px;color:#333;letter-spacing:.3px;word-spacing:3px;display:block}
+  .note{font-size:13px;color:var(--muted);margin-top:8px}
+  .pill{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:20px;background:#eceae5;color:#444;margin-left:8px;vertical-align:middle}
+  .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+  button{font-family:var(--serif);font-size:13px;padding:6px 12px;border:none;border-radius:8px;background:#eceae5;color:#222;cursor:pointer}
+  button:hover{background:#e2dfd9}
+  button.on{background:var(--blue);color:#fff}
+  .lens-pick,.ans-pick{display:flex;gap:8px;margin-bottom:10px}
+  .match{color:var(--blue);font-weight:600}
+  .mismatch{color:var(--red);font-weight:600}
+  .slider{display:flex;align-items:center;gap:12px;margin:7px 0;font-family:var(--mono);font-size:12px;color:#555}
+  .slider > span{width:22px;color:#888;font-style:italic}
+  .slider input[type=range]{flex:1;accent-color:var(--blue);height:4px}
+  .slider b{width:48px;text-align:right;color:#222;font-weight:600}
+  .slider-label{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;color:#a8a39a;margin:12px 0 4px}
+  .cand{font-family:var(--mono);font-size:12.5px;background:#f4f2ee;border-radius:8px;padding:9px 11px;color:#333;margin:2px 0 12px;white-space:pre-wrap}
+  .grade{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:7px 0}
+  .grade .gname{font-family:var(--serif);font-size:13.5px;line-height:1.25}
+  .grade .gname small{color:var(--muted);font-size:11.5px;display:block}
+  .gval{display:flex;align-items:center;gap:9px;flex:0 0 auto}
+  .gbar{width:64px;height:6px;background:#eceae5;border-radius:4px;overflow:hidden}
+  .gfill{height:100%}
+  .gscore{font-family:var(--mono);font-size:15px;font-weight:600;width:36px;text-align:right}
+  .prompt{display:none;font-family:var(--mono);font-size:11.5px;white-space:pre-wrap;background:#f4f2ee;border-radius:8px;padding:11px 12px;margin-top:10px;color:#333;max-height:300px;overflow:auto;line-height:1.45}
+  .prompt.show{display:block}
+  .prompt .lab{color:var(--blue);font-weight:600}
+  .promptbtn{display:block;width:100%;margin-top:14px;font-family:var(--mono);font-size:12.5px;letter-spacing:.02em;padding:10px;border:none;border-radius:8px;background:#e7eefc;color:var(--blue);cursor:pointer;font-weight:600}
+  .promptbtn:hover{background:#dbe6fb}
+</style>
+</head>
+<body>
+  <h1>SO(3) playground</h1>
+  <p class="sub">The pictorial counterpart to the SO(2) tool. <b>Drag the scene to orbit</b>; rotate B with the sliders; toggle <b>mirror</b>. A proper rotation (det&nbsp;=&nbsp;+1) keeps B congruent to A (&ldquo;same&rdquo;); a reflection (det&nbsp;=&nbsp;&minus;1) is the enantiomer no rotation can superimpose (&ldquo;mirror&rdquo;). The det sign is the chirality bit.</p>
+
+  <div class="wrap">
+    <div class="stage">
+      <div class="btns" style="margin-bottom:10px">
+        <span style="font-size:13px;color:var(--muted);align-self:center;margin-right:2px">figure</span>
+        <button class="shape on" data-shape="cloud" title="Chiral 6-point cloud — generic demo">point cloud</button>
+        <button class="shape" data-shape="screw" title="Chiral screw tetracube (4 cubes) — connects to the polycube task">screw tetracube</button>
+        <button class="shape" data-shape="patent" title="US D949,851 — &quot;Data reader&quot; (2022) · stylized 3D stand-in; dataset has no vector geometry">patent part</button>
+      </div>
+      <svg id="canvas" width="540" height="540"></svg>
+      <div id="figcap" class="note" style="margin-top:6px;min-height:16px"></div>
+      <div class="slider-label">ROTATE B · DEGREES</div>
+      <div class="slider"><span>θx</span><input id="sx" type="range" min="-180" max="180" value="0"><b id="vx">0°</b></div>
+      <div class="slider"><span>θy</span><input id="sy" type="range" min="-180" max="180" value="0"><b id="vy">0°</b></div>
+      <div class="slider"><span>θz</span><input id="sz" type="range" min="-180" max="180" value="0"><b id="vz">0°</b></div>
+      <div class="btns"><button id="mirror">toggle mirror</button><button id="reset">reset</button></div>
+      <button id="promptToggle" class="promptbtn">{ }  show the model prompt for this item</button>
+      <pre class="prompt" id="promptbox"></pre>
+    </div>
+
+    <div class="side">
+      <div class="card">
+        <h2>Transform B = T·A</h2>
+        <div class="det" id="detval">+1</div>
+        <div class="verdict" id="verdict"></div>
+        <div class="row"><span>proper-rotation alignment (Kabsch)</span><span id="kab"></span></div>
+        <div class="note" id="tnote"></div>
+      </div>
+
+      <div class="card">
+        <h2>What each oracle rung sees</h2>
+        <div class="lens-pick">
+          <button class="lens on" data-lens="dist">pairwise distances</button>
+          <button class="lens" data-lens="vol">signed volume</button>
+        </div>
+        <div id="lensbody"></div>
+      </div>
+
+      <div class="card">
+        <h2>Rungs grading a sample candidate</h2>
+        <div class="cand" id="cand"></div>
+        <div class="ans-pick"><span style="font-size:13px;color:var(--muted);align-self:center;margin-right:2px">candidate answers</span>
+          <button class="ans on" data-ans="same">same</button>
+          <button class="ans" data-ans="mirror">mirror</button></div>
+        <div id="grades"></div>
+      </div>
+
+      <div class="card">
+        <h2>Experiment baseline · best-of-N (60 items)</h2>
+        <svg id="baseline" width="300" height="150"></svg>
+        <div class="note" id="basenote">Tight (exact) climbs to 0.90 under best-of-N; the loose graders plateau ~0.60–0.63. Haiku-4.5, continuous SO(3), 60 items.<br><b>Stability</b> · self-consistency 0.84 (43% of items unanimous across 8 samples) — more disagreement than SO(2), which is why best-of-N gains more room.</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ---- 3x3 linear algebra ----
+const mul=(A,B)=>A.map(r=>[0,1,2].map(j=>r[0]*B[0][j]+r[1]*B[1][j]+r[2]*B[2][j]));
+const mv=(M,p)=>[M[0][0]*p[0]+M[0][1]*p[1]+M[0][2]*p[2],
+                 M[1][0]*p[0]+M[1][1]*p[1]+M[1][2]*p[2],
+                 M[2][0]*p[0]+M[2][1]*p[1]+M[2][2]*p[2]];
+const Rx=t=>[[1,0,0],[0,Math.cos(t),-Math.sin(t)],[0,Math.sin(t),Math.cos(t)]];
+const Ry=t=>[[Math.cos(t),0,Math.sin(t)],[0,1,0],[-Math.sin(t),0,Math.cos(t)]];
+const Rz=t=>[[Math.cos(t),-Math.sin(t),0],[Math.sin(t),Math.cos(t),0],[0,0,1]];
+const det3=M=>M[0][0]*(M[1][1]*M[2][2]-M[1][2]*M[2][1])
+             -M[0][1]*(M[1][0]*M[2][2]-M[1][2]*M[2][0])
+             +M[0][2]*(M[1][0]*M[2][1]-M[1][1]*M[2][0]);
+
+// ---- figures: {pts, edges, tetra(4 non-coplanar indices)} ----
+function buildPatent(){
+  // chiral twisted L-prism: front L profile, back face twisted 0.35 rad
+  const prof=[[0,0],[1.8,0],[1.8,0.6],[0.6,0.6],[0.6,1.8],[0,1.8]];
+  const cx=d3.mean(prof,d=>d[0]),cy=d3.mean(prof,d=>d[1]);
+  const tw=0.38, c=Math.cos(tw), s=Math.sin(tw);
+  const front=prof.map(([x,y])=>[x,y,-0.45]);
+  const back=prof.map(([x,y])=>{const dx=x-cx,dy=y-cy;return [cx+dx*c-dy*s, cy+dx*s+dy*c, 0.45];});
+  const pts=front.concat(back);
+  const edges=[];
+  for(let i=0;i<6;i++){edges.push([i,(i+1)%6]);edges.push([6+i,6+(i+1)%6]);edges.push([i,6+i]);}
+  return {pts,edges,tetra:[0,1,5,6]};
+}
+const FIGS={
+  cloud:{pts:[[0,0,0],[1.5,0.2,0.1],[0.7,1.4,0.3],[0.3,0.5,1.5],[1.6,1.3,1.1],[-0.5,1.1,0.9]],
+         edges:[[0,1],[0,2],[0,3],[1,4],[2,4],[3,5],[2,5],[1,2]], tetra:[0,1,2,3]},
+  screw:{pts:[[0,0,0],[1,0,0],[1,1,0],[1,1,1]],
+         edges:[[0,1],[1,2],[2,3]], tetra:[0,1,2,3]},
+  patent:buildPatent()
+};
+function normShape(F){
+  const cx=d3.mean(F.pts,d=>d[0]),cy=d3.mean(F.pts,d=>d[1]),cz=d3.mean(F.pts,d=>d[2]);
+  let c=F.pts.map(([x,y,z])=>[x-cx,y-cy,z-cz]);
+  const m=d3.max(c,p=>Math.hypot(p[0],p[1],p[2]));
+  const s=1.4/m;
+  return {pts:c.map(([x,y,z])=>[x*s,y*s,z*s]), edges:F.edges, tetra:F.tetra};
+}
+
+let fig=normShape(FIGS.cloud);
+let tx=0,ty=0,tz=0, reflect=false;       // object transform
+let az=0.6, el=-0.4;                       // camera orbit
+let lens='dist', candAns='same';
+
+const W=540,H=540,cx=W/2,cy=H/2,S=95;
+const svg=d3.select('#canvas');
+const gEdgeA=svg.append('g'), gEdgeB=svg.append('g'), gLens=svg.append('g'),
+      gPtB=svg.append('g'), gPtA=svg.append('g');
+
+svg.append('defs').append('marker').attr('id','arr').attr('viewBox','0 0 10 10')
+  .attr('refX',8).attr('refY',5).attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto-start-reverse')
+  .append('path').attr('d','M0,0 L10,5 L0,10 z').attr('fill','#b9b3c9');
+
+function objT(){const R=mul(mul(Rz(tz),Ry(ty)),Rx(tx));return reflect?mul(R,[[1,0,0],[0,1,0],[0,0,-1]]):R;}
+function cam(){return mul(Rx(el),Ry(az));}
+function proj(p){const C=cam(),q=mv(C,p);return {x:cx+q[0]*S, y:cy-q[1]*S, z:q[2]};}
+function dist(p,q){return Math.hypot(p[0]-q[0],p[1]-q[1],p[2]-q[2]);}
+function signature(P){const d=[];for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++)d.push(dist(P[i],P[j]));return d.sort((a,b)=>a-b);}
+function signedVol(P,t){const [a,b,c,d]=t.map(i=>P[i]);
+  const u=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],v=[c[0]-a[0],c[1]-a[1],c[2]-a[2]],w=[d[0]-a[0],d[1]-a[1],d[2]-a[2]];
+  return det3([u,v,w])/6;}
+
+function draw(){
+  const T=objT(), d=det3(T), pos=d>=0, col=pos?'var(--blue)':'var(--red)';
+  const A=fig.pts, B=A.map(p=>mv(T,p));
+  const PA=A.map(proj), PB=B.map(proj);
+
+  // reference A: faint dashed
+  gEdgeA.selectAll('line').data(fig.edges).join('line')
+    .attr('x1',e=>PA[e[0]].x).attr('y1',e=>PA[e[0]].y).attr('x2',e=>PA[e[1]].x).attr('y2',e=>PA[e[1]].y)
+    .attr('stroke','#cfcabf').attr('stroke-width',1.3).attr('stroke-dasharray','4 4');
+  gPtA.selectAll('circle').data(PA).join('circle').attr('cx',p=>p.x).attr('cy',p=>p.y).attr('r',3).attr('fill','#cfcabf');
+
+  // transformed B
+  gEdgeB.selectAll('line').data(fig.edges).join('line')
+    .attr('x1',e=>PB[e[0]].x).attr('y1',e=>PB[e[0]].y).attr('x2',e=>PB[e[1]].x).attr('y2',e=>PB[e[1]].y)
+    .attr('stroke',col).attr('stroke-width',2.2).attr('stroke-opacity',0.9);
+
+  // lens overlay on B
+  gLens.selectAll('*').remove();
+  if(lens==='dist'){
+    for(let i=0;i<B.length;i++)for(let j=i+1;j<B.length;j++)
+      gLens.append('line').attr('x1',PB[i].x).attr('y1',PB[i].y).attr('x2',PB[j].x).attr('y2',PB[j].y)
+        .attr('stroke',col).attr('stroke-opacity',0.13).attr('stroke-width',1);
+  }else{
+    const t=fig.tetra;
+    for(let k=0;k<4;k++){const i=t[k],j=t[(k+1)%4];
+      gLens.append('line').attr('x1',PB[i].x).attr('y1',PB[i].y).attr('x2',PB[j].x).attr('y2',PB[j].y)
+        .attr('stroke',col).attr('stroke-width',2).attr('marker-end','url(#arr)').attr('opacity',0.75);}
+  }
+
+  // B points (depth-shaded) + labels
+  const pts=gPtB.selectAll('g.pt').data(PB.map((p,i)=>({p,i}))).join(enter=>{
+    const g=enter.append('g').attr('class','pt');
+    g.append('circle').attr('r',5).attr('stroke','#fff').attr('stroke-width',1.5);
+    g.append('text').attr('font-family','var(--mono)').attr('font-size',12).attr('fill','#333').attr('dx',8).attr('dy',-7);
+    return g;});
+  pts.select('circle').attr('cx',d=>d.p.x).attr('cy',d=>d.p.y).attr('fill',col)
+     .attr('fill-opacity',d=>0.55+0.45*(d.p.z+1.4)/2.8);
+  pts.select('text').attr('x',d=>d.p.x).attr('y',d=>d.p.y).text(d=>d.i);
+
+  // ---- readouts ----
+  d3.select('#detval').text(pos?'+1':'−1').style('color',col);
+  d3.select('#verdict').html((pos?'orientation-preserving':'orientation-reversing')
+    +` &nbsp;<span class="pill"${pos?'':' style="background:#fbe3e4;color:#a91b22"'}>${pos?'rotation (same)':'reflection (mirror)'}</span>`)
+    .style('color',col);
+  d3.select('#kab').html(pos?'residual ≈ 0.00 — aligns':'no proper alignment → mirror')
+    .style('color',pos?'var(--blue)':'var(--red)');
+  d3.select('#tnote').html(pos
+    ? 'B is A under a proper 3D rotation — a clean &ldquo;same&rdquo; item. Orbit to confirm they superimpose.'
+    : 'B is the enantiomer (mirror) of A. No rotation in SO(3) superimposes them — orbit all you like, the handedness will not match.');
+
+  drawLens(A,B); drawGrader(A,B,pos); renderPrompt(A,B);
+}
+
+function renderPrompt(A,B){
+  const n=A.length;
+  const sys=`You are given two ordered lists of ${n} labeled 3D points, A and B. B[i]
+corresponds to A[i]. Exactly one is true:
+- "same": a single 3D rotation maps every A[i] onto B[i].
+- "mirror": B is a reflection of A (a mirror image); no rotation maps A onto B.
+Decide which. Reason briefly, then finish with ONE JSON object on its own final
+line, nothing after it:
+{"answer": "same" | "mirror", "explanation": "<one sentence>"}`;
+  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmt=p=>`[${p[0].toFixed(2)}, ${p[1].toFixed(2)}, ${p[2].toFixed(2)}]`;
+  const pa=A.map((p,i)=>`A[${i}]=${fmt(p)}`).join('\n');
+  const pb=B.map((p,i)=>`B[${i}]=${fmt(p)}`).join('\n');
+  d3.select('#promptbox').html(`<span class="lab">SYSTEM</span>\n${esc(sys)}\n\n<span class="lab">USER</span>\n${esc(pa)}\n${esc(pb)}`);
+}
+
+function drawLens(A,B){
+  const body=d3.select('#lensbody');
+  if(lens==='dist'){
+    const sa=signature(A),sb=signature(B);
+    const maxd=Math.max(...sa.map((v,i)=>Math.abs(v-sb[i])));
+    const equal=maxd<0.02;
+    body.html(`
+      <div class="sigrow"><div class="siglabel">distance signature of A</div><span class="sig">${sa.map(v=>v.toFixed(2)).join('  ')}</span></div>
+      <div class="sigrow"><div class="siglabel">distance signature of B (transformed)</div><span class="sig">${sb.map(v=>v.toFixed(2)).join('  ')}</span></div>
+      <div class="row"><span>max |Δ| over distances</span><span class="sig" style="color:${equal?'var(--blue)':'#a07a00'}">${maxd.toFixed(3)}</span></div>
+      <div class="note">Verdict from this feature: <span class="${equal?'match':'mismatch'}">${equal?'congruent → answers “same”':'not congruent → “mirror”'}</span></div>
+      <div class="note"><b>The chirality-blind (“invariant”) oracle.</b> ${reflect
+        ? 'This is a <span class="mismatch">mirror</span>, yet every pairwise distance still matches A — it reads “same” and is <b>wrong</b>. Distances cannot encode handedness in 3D either.'
+        : 'A rotation preserves all distances, so it correctly reads “same”. Toggle mirror to watch it fail.'}</div>`);
+  }else{
+    const va=signedVol(A,fig.tetra),vb=signedVol(B,fig.tetra);
+    const flipped=Math.sign(va)!==Math.sign(vb);
+    const dmag=Math.abs(Math.abs(va)-Math.abs(vb));
+    body.html(`
+      <div class="row"><span>signed volume of A</span><span class="sig">${va>=0?'+':'−'}${Math.abs(va).toFixed(3)}</span></div>
+      <div class="row"><span>signed volume of B</span><span class="sig">${vb>=0?'+':'−'}${Math.abs(vb).toFixed(3)}</span></div>
+      <div class="row"><span>Δ magnitude |vol|</span><span class="sig" style="color:var(--blue)">${dmag.toFixed(3)}</span></div>
+      <div class="note">Tetrahedron orientation: <span class="${flipped?'mismatch':'match'}">${flipped?'sign flipped → mirror':'sign preserved → same'}</span></div>
+      <div class="note"><b>The orientation-sensitive feature the tight oracle needs.</b> The sign of the signed volume <b>is</b> the 3D chirality bit (the analogue of signed area in 2D): rotations keep it, reflections flip it.</div>`);
+  }
+}
+
+const VOCAB=['rotat','axis','mirror','reflect','flip','orient','align','transform','vertex','distance','handed','superimpos','volume'];
+function drawGrader(A,B,pos){
+  const trueLabel=pos?'same':'mirror';
+  const EXPL={same:'the points superimpose under a single 3D rotation; pairwise distances are preserved',
+              mirror:'B is a mirror image — no rotation superimposes them and the handedness is reversed'};
+  const expl=EXPL[candAns];
+  d3.select('#cand').text(`{ "answer": "${candAns}",\n  "explanation": "${expl}" }`);
+  const sa=signature(A),sb=signature(B),congruent=sa.every((v,i)=>Math.abs(v-sb[i])<0.02);
+  const exact=candAns===trueLabel?1:0;
+  const inv=candAns==='same'?(congruent?1:0):(congruent?0:1);
+  const flScore=e=>{const h=VOCAB.filter(v=>e.toLowerCase().includes(v)).length;return 0.5+0.25*Math.min(h/5,1)+0.25*Math.min(e.length/300,1);};
+  const flu=flScore(expl), fluOther=flScore(EXPL[candAns==='same'?'mirror':'same']);
+  const sc=v=>v>=0.99?'var(--blue)':(v<=0.01?'var(--red)':'#a07a00');
+  const rows=[['exact','recomputes truth (Kabsch)',exact],['chirality-blind','distance congruence',inv],['fluency','surface text only',flu]];
+  const note = exact===0
+    ? `exact marks this <b>wrong</b> (0.00). Fluency gives it <b class="mismatch">${flu.toFixed(2)}</b> — and ${fluOther.toFixed(2)} to the <i>opposite</i> answer. It scores how the answer reads, not whether it is true, so it barely moves between right and wrong: <b>no signal to optimize toward.</b>`
+    : `exact marks this correct (1.00). Fluency = ${flu.toFixed(2)} here vs ${fluOther.toFixed(2)} for the opposite answer — nearly identical, so fluency cannot tell which is right. Flip to the wrong answer: exact drops to 0, fluency holds.`;
+  d3.select('#grades').html(
+    `<div class="note" style="margin-bottom:6px">true label: <b style="color:${trueLabel==='same'?'var(--blue)':'var(--red)'}">${trueLabel}</b></div>`
+    + rows.map(r=>{const c=sc(r[2]);return `<div class="grade"><div class="gname">${r[0]}<small>${r[1]}</small></div><div class="gval"><div class="gbar"><div class="gfill" style="width:${(r[2]*100).toFixed(0)}%;background:${c}"></div></div><div class="gscore" style="color:${c}">${r[2].toFixed(2)}</div></div></div>`;}).join('')
+    + `<div class="note">${note}</div>`);
+}
+
+// ---- controls ----
+function syncSliders(){d3.select('#vx').text(Math.round(tx*180/Math.PI)+'°');
+  d3.select('#vy').text(Math.round(ty*180/Math.PI)+'°');d3.select('#vz').text(Math.round(tz*180/Math.PI)+'°');}
+d3.select('#sx').on('input',function(){tx=+this.value*Math.PI/180;syncSliders();draw();});
+d3.select('#sy').on('input',function(){ty=+this.value*Math.PI/180;syncSliders();draw();});
+d3.select('#sz').on('input',function(){tz=+this.value*Math.PI/180;syncSliders();draw();});
+d3.select('#mirror').on('click',function(){reflect=!reflect;d3.select(this).classed('on',reflect);draw();});
+d3.select('#reset').on('click',function(){tx=ty=tz=0;reflect=false;d3.select('#mirror').classed('on',false);
+  d3.select('#sx').property('value',0);d3.select('#sy').property('value',0);d3.select('#sz').property('value',0);syncSliders();draw();});
+d3.selectAll('button.shape').on('click',function(){fig=normShape(FIGS[this.dataset.shape]);
+  d3.selectAll('button.shape').classed('on',false);d3.select(this).classed('on',true);
+  d3.select('#figcap').html(this.dataset.shape==='patent'
+    ? 'US D949,851 — “Data reader” · stylized 3D wireframe stand-in (dataset has no vector geometry), not the patent’s actual figure'
+    : '');
+  draw();});
+d3.selectAll('button.lens').on('click',function(){lens=this.dataset.lens;
+  d3.selectAll('button.lens').classed('on',false);d3.select(this).classed('on',true);draw();});
+d3.selectAll('button.ans').on('click',function(){candAns=this.dataset.ans;
+  d3.selectAll('button.ans').classed('on',false);d3.select(this).classed('on',true);draw();});
+d3.select('#promptToggle').on('click',function(){
+  const box=d3.select('#promptbox'), shown=box.classed('show');
+  box.classed('show',!shown); d3.select(this).text(shown?'{ }  show the model prompt for this item':'{ }  hide the model prompt');});
+
+// orbit
+svg.call(d3.drag()
+  .on('start',()=>svg.classed('drag',true))
+  .on('drag',e=>{az+=e.dx*0.01; el=Math.max(-1.4,Math.min(1.4,el-e.dy*0.01)); draw();})
+  .on('end',()=>svg.classed('drag',false)));
+
+// ---- experiment baseline (cached bon_so3.json; static) ----
+const BON={exact:[[1,.45],[2,.65],[4,.833],[8,.90]],
+           'chirality-blind':[[1,.45],[2,.50],[4,.617],[8,.633]],
+           fluency:[[1,.45],[2,.60],[4,.617],[8,.60]]};
+const BCOL={exact:'var(--blue)','chirality-blind':'#a07a00',fluency:'var(--red)'};
+function drawBaseline(){
+  const w=300,h=150,m={t:10,r:96,b:24,l:34}, xs=[1,2,4,8];
+  const sv=d3.select('#baseline'); sv.selectAll('*').remove();
+  const x=d3.scalePoint().domain(xs).range([m.l,w-m.r]);
+  const y=d3.scaleLinear().domain([0.4,1.0]).range([h-m.b,m.t]);
+  [0.5,0.75,1.0].forEach(v=>{sv.append('line').attr('x1',m.l).attr('x2',w-m.r).attr('y1',y(v)).attr('y2',y(v)).attr('stroke','#ece9e4');
+    sv.append('text').attr('x',m.l-5).attr('y',y(v)+3).attr('text-anchor','end').attr('font-size',9).attr('fill','#aaa').attr('font-family','var(--mono)').text(v.toFixed(2));});
+  xs.forEach(n=>sv.append('text').attr('x',x(n)).attr('y',h-9).attr('text-anchor','middle').attr('font-size',9).attr('fill','#aaa').attr('font-family','var(--mono)').text('N'+n));
+  const line=d3.line().x(d=>x(d[0])).y(d=>y(d[1]));
+  Object.entries(BON).forEach(([k,pts])=>{
+    sv.append('path').attr('d',line(pts)).attr('fill','none').attr('stroke',BCOL[k]).attr('stroke-width',2);
+    pts.forEach(p=>sv.append('circle').attr('cx',x(p[0])).attr('cy',y(p[1])).attr('r',2.5).attr('fill',BCOL[k]));
+    sv.append('text').attr('x',w-m.r+7).attr('y',y(pts[pts.length-1][1])+3).attr('font-size',9.5).attr('fill',BCOL[k]).attr('font-family','var(--serif)').text(k);
+  });
+}
+syncSliders(); draw(); drawBaseline();
+</script>
+</body>
+</html>

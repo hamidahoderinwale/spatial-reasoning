@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SO(2) playground · rotation vs reflection = the chirality bit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  :root{
+    --paper:#F7F5F2; --box:#ffffff; --ink:#1a1a1a; --muted:#6b6b6b;
+    --blue:#0f62fe; --red:#da1e28; --grid:#e6e2dc;
+    --serif:'Source Serif 4',Georgia,serif; --mono:'Source Code Pro',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);
+       line-height:1.45;padding:28px 24px 60px}
+  h1{font-size:21px;font-weight:600;margin:0 0 2px}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 22px}
+  .wrap{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start;max-width:1080px}
+  .stage{background:var(--box);border-radius:14px;padding:14px}
+  svg{display:block;border-radius:8px;background:#fbfaf8}
+  .side{flex:1;min-width:300px;display:flex;flex-direction:column;gap:14px}
+  .card{background:var(--box);border-radius:14px;padding:16px 18px}
+  .card h2{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+           font-weight:600;margin:0 0 10px}
+  .det{font-family:var(--mono);font-size:34px;font-weight:600;line-height:1}
+  .verdict{font-size:15px;margin-top:8px;font-weight:600}
+  .matrix{font-family:var(--mono);font-size:15px;color:#333;margin-top:10px;white-space:pre}
+  .row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:13px;
+       padding:3px 0;color:#333}
+  .row span:first-child{color:var(--muted);font-family:var(--serif)}
+  .sigrow{margin-bottom:9px}
+  .siglabel{color:var(--muted);font-size:12.5px;margin-bottom:3px}
+  .sig{font-family:var(--mono);font-size:13px;color:#333;letter-spacing:.3px;word-spacing:3px;display:block}
+  .grade{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:7px 0}
+  .grade .gname{font-family:var(--serif);font-size:13.5px;line-height:1.25}
+  .grade .gname small{color:var(--muted);font-size:11.5px;display:block}
+  .gval{display:flex;align-items:center;gap:9px;flex:0 0 auto}
+  .gbar{width:64px;height:6px;background:#eceae5;border-radius:4px;overflow:hidden}
+  .gfill{height:100%}
+  .gscore{font-family:var(--mono);font-size:15px;font-weight:600;width:36px;text-align:right}
+  .cand{font-family:var(--mono);font-size:12.5px;background:#f4f2ee;border-radius:8px;padding:9px 11px;color:#333;margin:2px 0 12px;white-space:pre-wrap}
+  .prompt{display:none;font-family:var(--mono);font-size:11.5px;white-space:pre-wrap;background:#f4f2ee;border-radius:8px;padding:11px 12px;margin-top:10px;color:#333;max-height:300px;overflow:auto;line-height:1.45}
+  .prompt.show{display:block}
+  .prompt .lab{color:var(--blue);font-weight:600}
+  .promptbtn{display:block;width:100%;margin-top:14px;font-family:var(--mono);font-size:12.5px;letter-spacing:.02em;padding:10px;border:none;border-radius:8px;background:#e7eefc;color:var(--blue);cursor:pointer;font-weight:600}
+  .promptbtn:hover{background:#dbe6fb}
+  .note{font-size:13px;color:var(--muted);margin-top:8px}
+  .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+  button{font-family:var(--serif);font-size:13px;padding:6px 12px;border:none;border-radius:8px;
+         background:#eceae5;color:#222;cursor:pointer}
+  button:hover{background:#e2dfd9}
+  button.on{background:var(--blue);color:#fff}
+  .pill{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:20px;
+        background:#eceae5;color:#444;margin-left:8px;vertical-align:middle}
+  .lens-pick{display:flex;gap:8px;margin-bottom:10px}
+  .match{color:var(--blue);font-weight:600}
+  .mismatch{color:var(--red);font-weight:600}
+  .legend{font-size:12.5px;color:var(--muted);margin-top:10px;line-height:1.6}
+  .key{display:inline-block;width:11px;height:11px;border-radius:3px;vertical-align:middle;margin-right:5px}
+</style>
+</head>
+<body>
+  <h1>SO(2) playground</h1>
+  <p class="sub">Drag the two basis-vector tips to build the 2&times;2 transform. <b>det &gt; 0</b> preserves handedness (rotation-like); <b>det &lt; 0</b> reverses it (a mirror). That sign is the whole same/mirror bit.</p>
+
+  <div class="wrap">
+    <div class="stage">
+      <div class="btns" style="margin-bottom:10px">
+        <span style="font-size:13px;color:var(--muted);align-self:center;margin-right:2px">figure</span>
+        <button class="shape on" data-shape="pentagon" title="Asymmetric chiral pentagon — generic demo shape">pentagon</button>
+        <button class="shape" data-shape="fglyph" title="Letter F — canonical chirality glyph (generic, not a patent)">F glyph</button>
+        <button class="shape" data-shape="ltet" title="L-tromino polyomino — nods to the polycube task (generic)">L-piece</button>
+        <button class="shape" data-shape="patent" title="US D949,851 — &quot;Data reader&quot; (2022) · stylized stand-in; dataset has no vector geometry">patent part</button>
+      </div>
+      <svg id="canvas" width="540" height="540"></svg>
+      <div id="figcap" class="note" style="margin-top:6px;min-height:16px"></div>
+      <div class="btns" style="margin-top:8px">
+        <button data-preset="id">identity</button>
+        <button data-preset="r30">rotate 30&deg;</button>
+        <button data-preset="r90">rotate 90&deg;</button>
+        <button data-preset="mirror">mirror (reflect x)</button>
+        <button data-preset="shear">shear</button>
+        <button id="locktoggle">lock to rigid</button>
+      </div>
+      <button id="promptToggle" class="promptbtn">{ }  show the model prompt for this item</button>
+      <pre class="prompt" id="promptbox"></pre>
+    </div>
+
+    <div class="side">
+      <div class="card">
+        <h2>Transform</h2>
+        <div class="det" id="detval">+1.000</div>
+        <div class="verdict" id="verdict"></div>
+        <div class="matrix" id="matrix"></div>
+        <div class="row"><span>rigid (isometry)?</span><span id="rigid"></span></div>
+        <div class="note" id="tnote"></div>
+      </div>
+
+      <div class="card">
+        <h2>What each oracle rung sees</h2>
+        <div class="lens-pick">
+          <button class="lens on" data-lens="dist">pairwise distances</button>
+          <button class="lens" data-lens="orient">signed area</button>
+        </div>
+        <div id="lensbody"></div>
+      </div>
+
+      <div class="card">
+        <h2>Rungs grading a sample candidate</h2>
+        <div class="cand" id="cand"></div>
+        <div class="btns" style="margin:0 0 12px"><span style="font-size:13px;color:var(--muted);align-self:center;margin-right:2px">candidate answers</span>
+          <button class="ans on" data-ans="same">same</button>
+          <button class="ans" data-ans="mirror">mirror</button></div>
+        <div id="grades"></div>
+      </div>
+
+      <div class="card">
+        <h2>Experiment baseline · best-of-N (60 items)</h2>
+        <svg id="baseline" width="300" height="150"></svg>
+        <div class="note" id="basenote">Tight (exact) climbs to 1.00 under best-of-N; the loose graders plateau ~0.80–0.85 (fluency even dips). Haiku-4.5, SO(2), 60 items.<br><b>Stability</b> · self-consistency 0.88 (58% of items unanimous across 8 samples) — the sample spread best-of-N selects from.</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ---- reference shape A: pick a chiral figure, centered + scaled to the grid ----
+const SHAPES={
+  pentagon:[[-0.65,-0.85],[0.95,-0.55],[1.15,0.55],[0.05,1.25],[-1.05,0.45]],
+  fglyph:[[0,0],[0.8,0],[0.8,2.0],[1.6,2.0],[1.6,2.7],[0.8,2.7],[0.8,3.2],[1.9,3.2],[1.9,4.0],[0,4.0]],
+  ltet:[[0,0],[2,0],[2,1],[1,1],[1,3],[0,3]],
+  patent:[[0,0],[2.2,0],[2.2,0.5],[0.9,0.5],[0.9,1.05],[1.6,1.05],[1.6,1.6],[0,1.6]]
+};
+function normShape(pts){
+  const cx=d3.mean(pts,d=>d[0]),cy=d3.mean(pts,d=>d[1]);
+  const c=pts.map(([x,y])=>[x-cx,y-cy]);
+  const m=d3.max(c,p=>Math.hypot(p[0],p[1]));
+  const s=1.4/m;
+  return c.map(([x,y])=>[x*s,y*s]);
+}
+let A = normShape(SHAPES.pentagon);
+
+// transform columns: i-hat (image of (1,0)), j-hat (image of (0,1))
+let ihat=[1,0], jhat=[0,1];
+let rigidLock=true, reflect=true;    // default: locked-rigid, opens on a mirror
+let candAns='same';                  // candidate gives the WRONG answer on load (shows the gap)
+
+const W=540,H=540, cx=W/2, cy=H/2, S=92; // pixels per unit
+const svg=d3.select('#canvas');
+const X=x=>cx+x*S, Y=y=>cy-y*S;            // world -> screen
+const ux=px=>(px-cx)/S, uy=py=>(cy-py)/S;  // screen -> world
+
+let lens='dist';
+
+// ---- static layers ----
+const gGrid=svg.append('g');
+for(let i=-3;i<=3;i++){
+  gGrid.append('line').attr('x1',X(i)).attr('y1',Y(-3)).attr('x2',X(i)).attr('y2',Y(3))
+    .attr('stroke',i===0?'#c9c4bc':'var(--grid)').attr('stroke-width',i===0?1.4:1);
+  gGrid.append('line').attr('x1',X(-3)).attr('y1',Y(i)).attr('x2',X(3)).attr('y2',Y(i))
+    .attr('stroke',i===0?'#c9c4bc':'var(--grid)').attr('stroke-width',i===0?1.4:1);
+}
+
+const gRef=svg.append('g');   // faint reference shape A
+const gFill=svg.append('g');  // transformed shape fill
+const gLens=svg.append('g');  // distance lines / orientation arrows
+const gB=svg.append('g');     // transformed points + labels
+const gBasis=svg.append('g'); // basis vectors
+
+// arrowhead for winding
+svg.append('defs').append('marker').attr('id','arr').attr('viewBox','0 0 10 10')
+  .attr('refX',8).attr('refY',5).attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto-start-reverse')
+  .append('path').attr('d','M0,0 L10,5 L0,10 z').attr('fill','#999');
+
+function mul(M,p){return [M[0][0]*p[0]+M[0][1]*p[1], M[1][0]*p[0]+M[1][1]*p[1]];}
+function det(){return ihat[0]*jhat[1]-jhat[0]*ihat[1];}
+function dist(p,q){return Math.hypot(p[0]-q[0],p[1]-q[1]);}
+function signature(pts){const d=[];for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++)d.push(dist(pts[i],pts[j]));return d.sort((a,b)=>a-b);}
+function signedArea(pts){let s=0;for(let i=0;i<pts.length;i++){const [x1,y1]=pts[i],[x2,y2]=pts[(i+1)%pts.length];s+=x1*y2-x2*y1;}return s/2;}
+function isRigid(){
+  const a=ihat,b=jhat;
+  const la=Math.hypot(a[0],a[1]), lb=Math.hypot(b[0],b[1]), dot=a[0]*b[0]+a[1]*b[1];
+  return Math.abs(la-1)<0.04 && Math.abs(lb-1)<0.04 && Math.abs(dot)<0.05;
+}
+
+function draw(){
+  const M=[[ihat[0],jhat[0]],[ihat[1],jhat[1]]];
+  const B=A.map(p=>mul(M,p));
+  const d=det(), pos=d>=0, col=pos?'var(--blue)':'var(--red)';
+  const rigid=isRigid();
+
+  // reference shape A
+  const refPath='M'+A.map(p=>`${X(p[0])},${Y(p[1])}`).join('L')+'Z';
+  gRef.selectAll('path').data([0]).join('path').attr('d',refPath)
+    .attr('fill','none').attr('stroke','#cfcabf').attr('stroke-width',1.4).attr('stroke-dasharray','4 4');
+
+  // transformed fill
+  const bPath='M'+B.map(p=>`${X(p[0])},${Y(p[1])}`).join('L')+'Z';
+  gFill.selectAll('path').data([0]).join('path').attr('d',bPath)
+    .attr('fill',col).attr('fill-opacity',0.10).attr('stroke',col).attr('stroke-width',2);
+
+  // lens overlay
+  gLens.selectAll('*').remove();
+  if(lens==='dist'){
+    for(let i=0;i<B.length;i++)for(let j=i+1;j<B.length;j++)
+      gLens.append('line').attr('x1',X(B[i][0])).attr('y1',Y(B[i][1]))
+        .attr('x2',X(B[j][0])).attr('y2',Y(B[j][1]))
+        .attr('stroke',col).attr('stroke-opacity',0.22).attr('stroke-width',1);
+  }else{
+    // directed winding path with arrowheads
+    for(let i=0;i<B.length;i++){
+      const p=B[i], q=B[(i+1)%B.length];
+      gLens.append('line').attr('x1',X(p[0])).attr('y1',Y(p[1]))
+        .attr('x2',X(q[0])).attr('y2',Y(q[1]))
+        .attr('stroke',col).attr('stroke-width',2).attr('marker-end','url(#arr)').attr('opacity',0.8);
+    }
+  }
+
+  // transformed points + labels
+  const pts=gB.selectAll('g.pt').data(B).join(
+    enter=>{const g=enter.append('g').attr('class','pt');
+      g.append('circle').attr('r',5).attr('fill',col);
+      g.append('text').attr('font-family','var(--mono)').attr('font-size',12).attr('fill','#333')
+        .attr('dx',9).attr('dy',-7);return g;});
+  pts.select('circle').attr('cx',d=>X(d[0])).attr('cy',d=>Y(d[1])).attr('fill',col);
+  pts.select('text').attr('x',d=>X(d[0])).attr('y',d=>Y(d[1])).text((d,i)=>i);
+
+  // basis vectors
+  drawBasis('i',ihat,col); drawBasis('j',jhat,col);
+
+  // ---- readouts ----
+  d3.select('#detval').text((d>=0?'+':'−')+Math.abs(d).toFixed(3)).style('color',col);
+  const lab = pos ? (rigid?'rotation':'rotation-like (+ scale/shear)')
+                  : (rigid?'reflection (mirror)':'orientation-reversed (+ scale/shear)');
+  d3.select('#verdict').html((pos?'orientation-preserving':'orientation-reversing')
+    + ` &nbsp;<span class="pill"${pos?'':' style="background:#fbe3e4;color:#a91b22"'}>${lab}</span>`)
+    .style('color',col);
+  d3.select('#matrix').text(
+    `M = [ ${fmt(M[0][0])}  ${fmt(M[0][1])} ]\n    [ ${fmt(M[1][0])}  ${fmt(M[1][1])} ]`);
+  d3.select('#rigid').text(rigid?'yes — distances preserved':'no — distances distorted')
+    .style('color',rigid?'var(--blue)':'#a07a00');
+  d3.select('#tnote').html(rigid
+    ? (pos? 'A pure rotation: a clean &ldquo;same&rdquo; item.' : 'A reflection: a clean &ldquo;mirror&rdquo; item — no rotation can undo it.')
+    : 'Not a rigid motion (scale/shear present). The same/mirror task only uses rigid M — turn on <b>lock to rigid</b> to isolate chirality from scale, or leave it off to watch det cross zero.');
+
+  drawLens(A,B,rigid,pos);
+  drawGrader(A,B,rigid,pos);
+  renderPrompt(A,B);
+}
+
+function renderPrompt(A,B){
+  const n=A.length;
+  const sys=`You are given two ordered lists of ${n} labeled 2D points, A and B, in the
+plane. B[i] corresponds to A[i]. Exactly one is true:
+- "same": a single rotation in the plane maps every A[i] onto B[i].
+- "mirror": B is a flat reflection of A (a mirror image); no in-plane rotation
+  maps A onto B.
+Tip: a rotation preserves the clockwise/counterclockwise order of the points; a
+reflection flips it. Reason briefly, then finish with ONE JSON object on its own
+final line, nothing after it:
+{"answer": "same" | "mirror", "explanation": "<one sentence>"}`;
+  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const pa=A.map((p,i)=>`A[${i}]=[${p[0].toFixed(2)}, ${p[1].toFixed(2)}]`).join('\n');
+  const pb=B.map((p,i)=>`B[${i}]=[${p[0].toFixed(2)}, ${p[1].toFixed(2)}]`).join('\n');
+  d3.select('#promptbox').html(`<span class="lab">SYSTEM</span>\n${esc(sys)}\n\n<span class="lab">USER</span>\n${esc(pa)}\n${esc(pb)}`);
+}
+
+function fmt(v){const s=v>=0?' ':'−';return s+Math.abs(v).toFixed(2);}
+
+function drawBasis(which,vec,col){
+  const g=gBasis.selectAll('g.'+which).data([vec]).join(
+    enter=>{const gg=enter.append('g').attr('class',which);
+      gg.append('line').attr('stroke',which==='i'?col:'#9a96b0').attr('stroke-width',3);
+      gg.append('circle').attr('class','tip').attr('r',9).attr('fill',which==='i'?col:'#7d79a0')
+        .attr('cursor','grab').attr('stroke','#fff').attr('stroke-width',2);
+      gg.append('text').attr('font-family','var(--mono)').attr('font-size',13).attr('font-weight',600)
+        .attr('fill','#fff').attr('text-anchor','middle').attr('dy',4).text(which==='i'?'î':'ĵ');
+      return gg;});
+  g.select('line').attr('x1',X(0)).attr('y1',Y(0)).attr('x2',X(vec[0])).attr('y2',Y(vec[1]))
+    .attr('stroke',which==='i'?col:'#9a96b0');
+  g.select('circle.tip').attr('cx',X(vec[0])).attr('cy',Y(vec[1])).attr('fill',which==='i'?col:'#7d79a0');
+  g.select('text').attr('x',X(vec[0])).attr('y',Y(vec[1]));
+  g.select('circle.tip').call(d3.drag()
+    .on('start',function(){d3.select(this).attr('cursor','grabbing');})
+    .on('drag',function(e){let x=ux(e.x),y=uy(e.y);
+      x=Math.max(-3,Math.min(3,x));y=Math.max(-3,Math.min(3,y));
+      if(rigidLock){
+        const th = which==='i' ? Math.atan2(y,x)
+                 : (reflect ? Math.atan2(y,x)+Math.PI/2 : Math.atan2(y,x)-Math.PI/2);
+        ihat=[Math.cos(th),Math.sin(th)];
+        jhat = reflect ? [Math.sin(th),-Math.cos(th)] : [-Math.sin(th),Math.cos(th)];
+      } else { if(which==='i')ihat=[x,y];else jhat=[x,y]; }
+      draw();})
+    .on('end',function(){d3.select(this).attr('cursor','grab');}));
+}
+
+function drawLens(A,B,rigid,pos){
+  const body=d3.select('#lensbody');
+  if(lens==='dist'){
+    const sa=signature(A), sb=signature(B);
+    const maxd=Math.max(...sa.map((v,i)=>Math.abs(v-sb[i])));
+    const equal=maxd<0.02;
+    body.html(`
+      <div class="sigrow"><div class="siglabel">distance signature of A</div><span class="sig">${sa.map(v=>v.toFixed(2)).join('  ')}</span></div>
+      <div class="sigrow"><div class="siglabel">distance signature of B (transformed)</div><span class="sig">${sb.map(v=>v.toFixed(2)).join('  ')}</span></div>
+      <div class="row"><span>max |Δ| over distances</span><span class="sig" style="color:${equal?'var(--blue)':'#a07a00'}">${maxd.toFixed(3)}</span></div>
+      <div class="note">Verdict from this feature:
+        <span class="${equal?'match':'mismatch'}">${equal?'congruent &rarr; answers &ldquo;same&rdquo;':'not congruent &rarr; answers &ldquo;mirror&rdquo;'}</span></div>
+      <div class="note"><b>This is the chirality-blind (&ldquo;invariant&rdquo;) oracle.</b> ${
+        rigid && !pos
+        ? '&nbsp;Notice: this is a <span class="mismatch">mirror</span>, yet the distances match A exactly &mdash; the feature says &ldquo;same&rdquo; and is <b>wrong</b>. It physically cannot see handedness.'
+        : (rigid? '&nbsp;A rotation preserves distances, so it correctly reads &ldquo;same&rdquo; here. Flip to a mirror to watch it fail.' : '&nbsp;Distortion breaks the distances, so congruence drops &mdash; but that is scale, not chirality.')}</div>`);
+  }else{
+    const aa=signedArea(A), ab=signedArea(B);
+    const flipped=Math.sign(aa)!==Math.sign(ab);
+    const dmag=Math.abs(Math.abs(aa)-Math.abs(ab));
+    body.html(`
+      <div class="row"><span>signed area of A</span><span class="sig">${aa>=0?'+':'−'}${Math.abs(aa).toFixed(3)} (${aa>=0?'CCW':'CW'})</span></div>
+      <div class="row"><span>signed area of B</span><span class="sig">${ab>=0?'+':'−'}${Math.abs(ab).toFixed(3)} (${ab>=0?'CCW':'CW'})</span></div>
+      <div class="row"><span>Δ magnitude |area|</span><span class="sig" style="color:var(--blue)">${dmag.toFixed(3)}</span></div>
+      <div class="note">Winding order:
+        <span class="${flipped?'mismatch':'match'}">${flipped?'reversed &rarr; a mirror':'preserved &rarr; same'}</span></div>
+      <div class="note"><b>This is the orientation-sensitive feature the tight oracle needs.</b> The sign of the signed area <b>is</b> the chirality bit: rotations keep it, reflections flip it. The distance oracle throws this sign away.</div>`);
+  }
+}
+
+const VOCAB=['rotat','axis','mirror','reflect','flip','orient','align','transform','vertex','distance','handed','superimpos'];
+function drawGrader(A,B,rigid,pos){
+  const trueLabel=(rigid&&pos)?'same':'mirror';
+  const EXPL={same:'the points align under a single rotation; vertex order and pairwise distances are preserved',
+              mirror:'the configuration is flipped — no rotation superimposes them and the handedness is reversed'};
+  const expl=EXPL[candAns];
+  d3.select('#cand').text(`{ "answer": "${candAns}",\n  "explanation": "${expl}" }`);
+
+  const sa=signature(A), sb=signature(B);
+  const congruent=sa.every((v,i)=>Math.abs(v-sb[i])<0.02);
+  const exact = candAns===trueLabel ? 1 : 0;
+  const inv = candAns==='same' ? (congruent?1:0) : (congruent?0:1);
+  const flScore=e=>{const h=VOCAB.filter(v=>e.toLowerCase().includes(v)).length;return 0.5+0.25*Math.min(h/5,1)+0.25*Math.min(e.length/300,1);};
+  const flu=flScore(expl), fluOther=flScore(EXPL[candAns==='same'?'mirror':'same']);
+
+  const sc=v=>v>=0.99?'var(--blue)':(v<=0.01?'var(--red)':'#a07a00');
+  const rows=[
+    ['exact','recomputes truth (Kabsch)',exact],
+    ['chirality-blind','distance congruence',inv],
+    ['fluency','surface text only',flu],
+  ];
+  const note = exact===0
+    ? `exact marks this <b>wrong</b> (0.00). Fluency gives it <b class="mismatch">${flu.toFixed(2)}</b> — and ${fluOther.toFixed(2)} to the <i>opposite</i> answer. It scores how the answer reads, not whether it is true, so it barely moves between right and wrong: <b>no signal to optimize toward.</b>`
+    : `exact marks this correct (1.00). Fluency = ${flu.toFixed(2)} here vs ${fluOther.toFixed(2)} for the opposite answer — nearly identical, so fluency cannot tell which is right. Flip to the wrong answer: exact drops to 0, fluency holds.`;
+  d3.select('#grades').html(
+    `<div class="note" style="margin-bottom:6px">true label: <b style="color:${trueLabel==='same'?'var(--blue)':'var(--red)'}">${trueLabel}</b></div>`
+    + rows.map(r=>{const c=sc(r[2]);return `<div class="grade"><div class="gname">${r[0]}<small>${r[1]}</small></div><div class="gval"><div class="gbar"><div class="gfill" style="width:${(r[2]*100).toFixed(0)}%;background:${c}"></div></div><div class="gscore" style="color:${c}">${r[2].toFixed(2)}</div></div></div>`;}).join('')
+    + `<div class="note">${note}</div>`);
+}
+
+// ---- presets ----
+function rot(t){return [[Math.cos(t),-Math.sin(t)],[Math.sin(t),Math.cos(t)]];}
+function setM(M){ihat=[M[0][0],M[1][0]];jhat=[M[0][1],M[1][1]];draw();}
+d3.selectAll('button[data-preset]').on('click',function(){
+  const p=this.dataset.preset;
+  if(p==='id'){reflect=false;setM([[1,0],[0,1]]);}
+  else if(p==='r30'){reflect=false;setM(rot(Math.PI/6));}
+  else if(p==='r90'){reflect=false;setM(rot(Math.PI/2));}
+  else if(p==='mirror'){reflect=true;setM([[-1,0],[0,1]]);}
+  else if(p==='shear'){rigidLock=false;d3.select('#locktoggle').classed('on',false);setM([[1,0.6],[0,1]]);}
+});
+d3.select('#locktoggle').on('click',function(){
+  rigidLock=!rigidLock;
+  d3.select(this).classed('on',rigidLock);
+  if(rigidLock){ // snap to nearest isometry, preserving current chirality
+    const th=Math.atan2(ihat[1],ihat[0]); reflect=det()<0;
+    ihat=[Math.cos(th),Math.sin(th)];
+    jhat = reflect ? [Math.sin(th),-Math.cos(th)] : [-Math.sin(th),Math.cos(th)];
+  }
+  draw();
+});
+d3.selectAll('button.shape').on('click',function(){
+  A=normShape(SHAPES[this.dataset.shape]);
+  d3.selectAll('button.shape').classed('on',false);
+  d3.select(this).classed('on',true);
+  d3.select('#figcap').html(this.dataset.shape==='patent'
+    ? 'US D949,851 — “Data reader” · stylized wireframe stand-in (dataset has no vector geometry), not the patent’s actual drawing'
+    : '');
+  draw();
+});
+d3.selectAll('button.ans').on('click',function(){
+  candAns=this.dataset.ans;
+  d3.selectAll('button.ans').classed('on',false);
+  d3.select(this).classed('on',true);
+  draw();
+});
+d3.select('#promptToggle').on('click',function(){
+  const box=d3.select('#promptbox'), shown=box.classed('show');
+  box.classed('show',!shown); d3.select(this).text(shown?'{ }  show the model prompt for this item':'{ }  hide the model prompt');
+});
+d3.selectAll('button.lens').on('click',function(){
+  lens=this.dataset.lens;
+  d3.selectAll('button.lens').classed('on',false);
+  d3.select(this).classed('on',true);
+  draw();
+});
+
+// ---- experiment baseline (cached bon_so2.json; static) ----
+const BON={exact:[[1,.733],[2,.90],[4,1.0],[8,1.0]],
+           'chirality-blind':[[1,.733],[2,.817],[4,.867],[8,.85]],
+           fluency:[[1,.733],[2,.833],[4,.817],[8,.80]]};
+const BCOL={exact:'var(--blue)','chirality-blind':'#a07a00',fluency:'var(--red)'};
+function drawBaseline(){
+  const w=300,h=150,m={t:10,r:96,b:24,l:34}, xs=[1,2,4,8];
+  const sv=d3.select('#baseline'); sv.selectAll('*').remove();
+  const x=d3.scalePoint().domain(xs).range([m.l,w-m.r]);
+  const y=d3.scaleLinear().domain([0.4,1.0]).range([h-m.b,m.t]);
+  [0.5,0.75,1.0].forEach(v=>{sv.append('line').attr('x1',m.l).attr('x2',w-m.r).attr('y1',y(v)).attr('y2',y(v)).attr('stroke','#ece9e4');
+    sv.append('text').attr('x',m.l-5).attr('y',y(v)+3).attr('text-anchor','end').attr('font-size',9).attr('fill','#aaa').attr('font-family','var(--mono)').text(v.toFixed(2));});
+  xs.forEach(n=>sv.append('text').attr('x',x(n)).attr('y',h-9).attr('text-anchor','middle').attr('font-size',9).attr('fill','#aaa').attr('font-family','var(--mono)').text('N'+n));
+  const line=d3.line().x(d=>x(d[0])).y(d=>y(d[1]));
+  Object.entries(BON).forEach(([k,pts])=>{
+    sv.append('path').attr('d',line(pts)).attr('fill','none').attr('stroke',BCOL[k]).attr('stroke-width',2);
+    pts.forEach(p=>sv.append('circle').attr('cx',x(p[0])).attr('cy',y(p[1])).attr('r',2.5).attr('fill',BCOL[k]));
+    sv.append('text').attr('x',w-m.r+7).attr('y',y(pts[pts.length-1][1])+3).attr('font-size',9.5).attr('fill',BCOL[k]).attr('font-family','var(--serif)').text(k);
+  });
+}
+// open in rigid mirror + wrong-answer state so the dissociation shows on load
+(function(){const th=0.6; ihat=[Math.cos(th),Math.sin(th)]; jhat=[Math.sin(th),-Math.cos(th)];
+  d3.select('#locktoggle').classed('on',true);})();
+draw(); drawBaseline();
+</script>
+</body>
+</html>
