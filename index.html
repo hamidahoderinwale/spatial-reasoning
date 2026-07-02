@@ -96,14 +96,46 @@
   @media (max-width:560px){ body{font-size:17px} header{padding-top:52px} .wrap{padding:0 22px} }
   /* interactive playground embed */
   section#playground .pg-bleed{position:relative;left:50%;transform:translateX(-50%);width:min(1060px,96vw);margin-top:6px}
-  section#playground iframe{width:100%;height:1100px;border:0;border-radius:6px;background:var(--box)}
+  section#playground iframe{width:100%;height:1100px;border:1.5px solid var(--ink);border-radius:0;background:var(--box)}
   .pg-tabs{display:flex;gap:8px;margin-bottom:12px;justify-content:center}
   .pg-tab{font-family:var(--mono);font-size:13px;padding:6px 14px;border:0;border-radius:6px;background:#e9e6e0;color:#222;cursor:pointer}
   .pg-tab.on{background:var(--accent);color:#fff}
   .pg-fallback{font-family:var(--mono);font-size:12px;margin-top:10px;text-align:center;color:var(--olive)}
+  /* reading-progress bar */
+  .progress{position:fixed;top:0;left:0;height:2px;width:0;background:var(--accent);z-index:40;transition:width .1s linear}
+  /* left sidebar TOC on wide screens; the inline nav.toc is used on narrow screens */
+  .rail{display:none}
+  @media (min-width:1180px){
+    nav.toc{display:none}
+    .rail{display:block;position:fixed;left:34px;top:96px;width:190px;z-index:30}
+    .rail .tl{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--olive);margin:0 0 13px}
+    .rail ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+    .rail a{font-family:var(--mono);font-size:12px;line-height:1.35;color:var(--olive);text-decoration:none;display:flex;gap:9px}
+    .rail a .n{color:var(--gray);min-width:20px}
+    .rail a:hover{color:var(--ink)}
+    .rail a.on{color:var(--ink)}
+    .rail a.on .n{color:var(--accent)}
+    /* keep the playground clear of the fixed rail: anchor left, bleed rightward */
+    section#playground .pg-bleed{left:0;transform:none;width:min(1000px,calc((100vw + 680px)/2 - 80px))}
+  }
 </style>
 </head>
 <body>
+<div class="progress" id="progress"></div>
+<aside class="rail" aria-label="Contents">
+  <div class="tl">Contents</div>
+  <ol>
+    <li><a href="#s1"><span class="n">&sect;1</span> Validating the bitter lesson</a></li>
+    <li><a href="#s2"><span class="n">&sect;2</span> Why design patents</a></li>
+    <li><a href="#s3"><span class="n">&sect;3</span> Tasks</a></li>
+    <li><a href="#playground"><span class="n">&#9658;</span> Interactive playground</a></li>
+    <li><a href="#s4"><span class="n">&sect;4</span> Benchmark construction</a></li>
+    <li><a href="#s5"><span class="n">&sect;5</span> Results</a></li>
+    <li><a href="#s6"><span class="n">&sect;6</span> Supporting with anchors</a></li>
+    <li><a href="#s7"><span class="n">&sect;7</span> Discussion</a></li>
+    <li><a href="#s8"><span class="n">&sect;8</span> References</a></li>
+  </ol>
+</aside>
 <div class="wrap">
   <header>
     <h1>Explorations into (LLM) spatial reasoning with design patents</h1>
@@ -113,10 +145,10 @@
   <nav class="toc">
     <div class="tl">Contents</div>
     <ol>
-      <li><a href="#playground"><span class="n">&#9658;</span> Interactive playground</a></li>
       <li><a href="#s1"><span class="n">&sect;1</span> Validating the bitter lesson</a></li>
       <li><a href="#s2"><span class="n">&sect;2</span> Why we use design patents to probe into spatial reasoning</a></li>
       <li><a href="#s3"><span class="n">&sect;3</span> Tasks</a></li>
+      <li><a href="#playground"><span class="n">&#9658;</span> Interactive playground</a></li>
       <li><a href="#s4"><span class="n">&sect;4</span> Benchmark construction</a></li>
       <li><a href="#s5"><span class="n">&sect;5</span> Results</a></li>
       <li><a href="#s6"><span class="n">&sect;6</span> Supporting models with anchors</a></li>
@@ -125,32 +157,11 @@
     </ol>
   </nav>
 
-  <section id="playground">
-    <h2><span class="n">&#9658;</span> Interactive playground</h2>
-    <p class="lead">The playground below lets you try the task we give the models: decide whether one shape is another rotated, or its mirror image. The SO(2) tab is the orthographic, planar case, with shapes spun in a flat plane; the SO(3) tab is the pictorial, three-dimensional case, with objects turned freely in space.</p>
-    <p>As you change a shape, watch how three graders score the answer: a strict one that checks the true geometry, a middle one that checks a rotation-invariant shortcut that is blind to handedness, and a loose one that rewards confident-looking answers. The point is to feel directly how much the grader you optimize against decides whether getting better means getting the geometry right or just satisfying the check.</p>
-    <div class="pg-bleed">
-      <div class="pg-tabs">
-        <button class="pg-tab on" data-src="playground/so2.html">SO(2) &middot; orthographic plane</button>
-        <button class="pg-tab" data-src="playground/so3.html">SO(3) &middot; pictorial 3D</button>
-      </div>
-      <iframe id="pgframe" src="playground/so2.html" title="rotation and reflection playground" loading="lazy"></iframe>
-      <p class="pg-fallback"><a href="playground/so2.html" target="_blank" rel="noopener">open in a new tab &rarr;</a></p>
-    </div>
-    <script>
-    (function(){var f=document.getElementById('pgframe');
-      document.querySelectorAll('.pg-tab').forEach(function(b){b.addEventListener('click',function(){
-        document.querySelectorAll('.pg-tab').forEach(function(t){t.classList.remove('on');});
-        b.classList.add('on'); f.src=b.dataset.src;
-        document.querySelector('.pg-fallback a').href=b.dataset.src;});});})();
-    </script>
-  </section>
-
   <section>
     <h2 id="s1"><span class="n">&sect;1</span> Validating the bitter lesson</h2>
     <p class="lead">In this work, we study structural reasoning in the context of patent and technical design understanding. Our contributions include several novel task types that benchmark capabilities needed for strong agentic performance in physical design domains.</p>
     <p>We think this work is interesting as people prompt to orient digital objects in their generations, models' ability to apply spatial reasoning will be tested and we want to see to what extent it is possessed.</p>
-    <p>For each task, we experiment with multiple representations of the underlying information. We are interested not only in which models perform best, but how the way the information they are presented and asked to present is structured. To do this, we also release a gym environment with design patent figures as states, a <a href="https://en.wikipedia.org/wiki/Domain-specific_language">DSL</a> action space for composing figures, gradeable spatial reasoning tasks that provide verifiable rewards, and a renderer that turns the DSL into a visual form.</p>
+    <p>For each task, we experiment with multiple representations of the underlying information. We are interested not only in which models perform best, but how the way the information they are presented and asked to present is structured. To do this, we also release a benchmark of gradeable spatial reasoning tasks, a <a href="https://en.wikipedia.org/wiki/Domain-specific_language">DSL</a> induced from the corpus for composing and reasoning about patent figures, graders that score each task in the representation space its output lives in, and a renderer that turns the DSL into a visual form.</p>
     <p>In general, we find that representational interventions can equip models with the support they need to perform on tasks that require spatial understanding, however, it is important to be intentional about the types of representations and when they are implemented. In our view, spatial reasoning can be decomposed into two parts: categorical and geometric thinking. Categorical thinking &mdash; where a model, for example, should identify the correct viewpoints from a set &mdash; is best supported via test-time reasoning, whereas geometric thinking likely needs to be imbued in a model during early stages (i.e. training).</p>
   </section>
 
@@ -197,13 +208,34 @@ Output (filled schema):
   design_intent  : &quot;a collapsible chair for compact storage&quot;</pre>
       </li>
       <li>
-        <p><span class="name">Agent-to-agent communication.</span> We view a model&rsquo;s ability to express its work and outputs as a pre-cursor to collaborating and iterating in offline settings. For this task, two agents form a dyad and play a reference game adapted from the procedural-abstraction communication setup of McCarthy et al.&nbsp;<a class="cite" href="#ref-mccarthy2021">(2021)</a>, in which agent&nbsp;A is given a patent figure and expresses its design in natural language to agent&nbsp;B, who must reconstruct it. We run this under two conditions, viewpoint-aware and viewpoint-agnostic.</p>
+        <p><span class="name">Agent-to-agent communication.</span> We view a model&rsquo;s ability to express its work and outputs as a pre-cursor to collaborating and iterating in offline settings. For this task, two agents form a dyad and play a reference game adapted from the procedural-abstraction communication setup of <a class="cite" href="#ref-mccarthy2021">McCarthy et al. (2021)</a>, in which agent&nbsp;A is given a patent figure and expresses its design in natural language to agent&nbsp;B, who must reconstruct it. We run this under two conditions, viewpoint-aware and viewpoint-agnostic.</p>
 <pre>Designer (sees target view): &quot;A perspective view of a cylindrical bottle
   with a ribbed cap and a tapered neck.&quot;
 Maker (sees a pool of candidate figures, no labels): picks 1 of N
 Score: 1 if Maker&rsquo;s pick == Designer&rsquo;s target, else 0</pre>
       </li>
     </ol>
+  </section>
+
+  <section id="playground">
+    <h2><span class="n">&#9658;</span> Interactive playground</h2>
+    <p class="lead">This is the geometric variant of the masked-view task. We use the principles of special orthogonal groups to define a vocabulary of rotations, discrete elements in finite subgroups of SO(2) and SO(3) in 2D and 3D space, with 4 and 24 rotations respectively. Given two shapes, the task is to decide whether one is a rotation of the other (&ldquo;same&rdquo;) or its mirror (&ldquo;mirror&rdquo;). We choose the chiral octahedral group because it is defined by its rotations and preserves a grid, which gives us clean coordinates to work with for our grading system.</p>
+    <p>We grade with RMSD, a measure of the structural difference between the ground truth figure and the generated one, and we consider whether introducing an oracle the model can see can elicit reasoning by giving it a structural anchor. Change a shape and watch the oracle rungs: a strict rung keeps handedness, so it separates a true rotation from its mirror, while a looser, rotation-invariant rung throws that sign away. We lean into the model&rsquo;s tendency to reward hack, so the rung you optimize against decides whether getting better means recovering the geometry or just satisfying the check.</p>
+    <div class="pg-bleed">
+      <div class="pg-tabs">
+        <button class="pg-tab on" data-src="playground/so2.html">SO(2) &middot; planar, 4 rotations</button>
+        <button class="pg-tab" data-src="playground/so3.html">SO(3) &middot; 3D, 24 rotations</button>
+      </div>
+      <iframe id="pgframe" src="playground/so2.html" title="rotation and reflection playground" loading="lazy"></iframe>
+      <p class="pg-fallback"><a href="playground/so2.html" target="_blank" rel="noopener">open in a new tab &rarr;</a></p>
+    </div>
+    <script>
+    (function(){var f=document.getElementById('pgframe');
+      document.querySelectorAll('.pg-tab').forEach(function(b){b.addEventListener('click',function(){
+        document.querySelectorAll('.pg-tab').forEach(function(t){t.classList.remove('on');});
+        b.classList.add('on'); f.src=b.dataset.src;
+        document.querySelector('.pg-fallback a').href=b.dataset.src;});});})();
+    </script>
   </section>
 
   <section>
@@ -395,5 +427,17 @@ Score: 1 if Maker&rsquo;s pick == Designer&rsquo;s target, else 0</pre>
 
   <footer>Hamidah Oderinwale</footer>
 </div>
+<script>
+(function(){var p=document.getElementById('progress');
+function upd(){var h=document.documentElement,max=h.scrollHeight-h.clientHeight;
+p.style.width=(max>0?(h.scrollTop/max*100):0)+'%';}
+addEventListener('scroll',upd,{passive:true});addEventListener('resize',upd);upd();})();
+(function(){var links=Array.prototype.slice.call(document.querySelectorAll('.rail a'));
+if(!links.length)return;
+var secs=links.map(function(a){return document.getElementById(a.getAttribute('href').slice(1));});
+function hi(){var cur=0;for(var i=0;i<secs.length;i++){if(secs[i]&&secs[i].getBoundingClientRect().top<=140)cur=i;}
+links.forEach(function(a,i){a.classList.toggle('on',i===cur);});}
+addEventListener('scroll',hi,{passive:true});addEventListener('resize',hi);hi();})();
+</script>
 </body>
 </html>
